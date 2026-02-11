@@ -213,3 +213,4 @@ session_player.close()
 ```
 - Les tables sont désormais à jour. Si vous avez installé pgAdmin, vous pouvz siualsier facilement l'intégration des données.
 
+![alt text](notebooks/graph/Moyenne_metriques_ragas.png)

@@ -24,4 +24,4 @@ app.py
 MistralChat.py
 pyproject.toml
 test.py
-notebook/
+notebooks/notebook_evaluation_ragas.ipynb
