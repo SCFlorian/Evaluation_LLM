@@ -1,0 +1,27 @@
+# ===================
+# Fichiers à ignorer
+# ===================
+
+# Ignore les fichiers pouvant contenant des données confidentielles
+.env
+__pycache__
+
+# On ne versionne pas les fichiers propres au MacBook
+.DS_Store
+
+# On ignore le poetry lock
+poetry.lock
+
+# A ignore pour le moment
+data/
+database/
+evaluation/
+rag/
+scripts/
+tests/
+vector_db/
+app.py
+MistralChat.py
+pyproject.toml
+test.py
+notebook/
