@@ -1,4 +1,4 @@
-# Assistant RAG avec Mistral
+# Assistant RAG avec Llama
 
 Ce projet implémente un assistant virtuel basé sur le modèle Mistral, utilisant la technique de Retrieval-Augmented Generation (RAG) pour fournir des réponses précises et contextuelles à partir d'une base de connaissances personnalisée.
 L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à quelques améliorations afin d'obtenir des meilleurs résultats.
