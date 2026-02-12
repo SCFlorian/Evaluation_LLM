@@ -15,11 +15,7 @@ poetry.lock
 
 # A ignore pour le moment
 data/processed
-
-scripts/
-tests/
 vector_db/
-app.py
 MistralChat.py
 pyproject.toml
 test.py
