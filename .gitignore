@@ -13,8 +13,7 @@ __pycache__
 poetry.lock
 
 # A ignore pour le moment
-data/
-database/
+data/processed
 evaluation/
 rag/
 scripts/
@@ -24,5 +23,6 @@ app.py
 MistralChat.py
 pyproject.toml
 test.py
-notebooks/notebook_evaluation_ragas.ipynb
 .logfire
+test_2.py
+test_3.py
