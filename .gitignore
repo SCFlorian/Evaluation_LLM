@@ -5,6 +5,7 @@
 # Ignore les fichiers pouvant contenant des données confidentielles
 .env
 __pycache__
+__init__.py
 
 # On ne versionne pas les fichiers propres au MacBook
 .DS_Store
@@ -14,8 +15,7 @@ poetry.lock
 
 # A ignore pour le moment
 data/processed
-evaluation/
-rag/
+
 scripts/
 tests/
 vector_db/
