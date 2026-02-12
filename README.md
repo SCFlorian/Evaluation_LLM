@@ -231,7 +231,7 @@ Ce qu'il se passe :
 - génération de 4 colonnes supplémentaires (les 4 métriques) dans le csv 
 - Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
 
-- #### **Résultats de l'évaluation sur l'ensemble des questions**
+#### **Résultats de l'évaluation sur l'ensemble des questions**
 - Nous récupérons notre csv et nous avons décortiqué les résultats dans un notebook dédié.
 - Nous avons déjà regardé les scores moyens au global sur les 15 questions :
 
@@ -254,7 +254,7 @@ Ce qu'il se passe :
 - la precision basse, le retriever ramène du bruit.
 - le recall bas, il manque des infos clés.
 
-- #### **Résultats de l'évaluation par type de question**
+#### **Résultats de l'évaluation par type de question**
 - Regardons les résultats par type de question :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question.png)
@@ -268,7 +268,7 @@ On voit avec ce graphique que les scores globaux sont tirés vers le haut par le
 En regardant uniquement les réponses de l'interface du chatbot, il arrive à répondre à toutes les questions mais en analysant les réponses attendues et celles du chatbot ainsi que les résultats des métriques, on identifie très vite les limites du modèle actuel.
 Les scores démontrent un manque d'efficacité à récupérer les documents utiles pour apporter une réponse cohérente et factuelle et va s'appuyer sur une recherche internet que par notre système RAG.
 
-Nous avons alors regarder comment les docuemnts sont générés et nous avons identifier ce qui pourrait être le problème. 
+Nous avons alors regarder comment les documents sont générés et nous avons identifier ce qui pourrait être le problème. 
 **Actuellement le modèle prend en compte le fichier excel comme un fichier texte.** En l'état, le modèle prend en compte les données en texte et va les découper, il va alors se "perdre" lors du retrieval et ne va pas être capable de porposer des calculs si par exemple on lui demande de calculer le nombre de points d'une équipe en particulier.
 
 - **Définition de notre nouveau objectif**
