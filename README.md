@@ -1,21 +1,22 @@
 # Assistant RAG avec Llama
 
-Ce projet implémente un assistant virtuel basé sur le modèle Mistral, utilisant la technique de Retrieval-Augmented Generation (RAG) pour fournir des réponses précises et contextuelles à partir d'une base de connaissances personnalisée.
+Ce projet implémente un assistant virtuel basé sur un modèle Llama, utilisant la technique de Retrieval-Augmented Generation (RAG) pour fournir des réponses précises et contextuelles à partir d'une base de connaissances personnalisée.
 L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à quelques améliorations afin d'obtenir des meilleurs résultats.
 Les améliorations seront visibles avec une comparaison des métriques ragas sur le prototype vs la nouvelle structuration du projet.
 
 ## Fonctionnalités
 
-- 🗄️ **Recherche sémantique** avec FAISS pour trouver les documents pertinents (PDF à disposition)
+- 🗄️ **Création des vecteurs** avec HuggingFaceEmbeddings.
+- 🗄️ **Recherche sémantique** avec FAISS pour trouver les documents pertinents (PDF à disposition).
 - 🗄️ **Recherche dans une base relationnelle** avec une base de données PostreSQL pour effectuer une recherche des éléments chiffrés.
 - 🔍 **Choix du système** pour sélectionner le bon type de donnée à prendre.
-- 🤖 **Génération de réponses** avec les modèles Mistral (Small ou Large)
-- ⚙️ **Paramètres personnalisables** (modèle, nombre de documents, score minimum)
+- 🤖 **Génération de réponses** avec un modèle Llama (llama-3.3-70b-versatile) via Groq.
+- ⚙️ **Paramètres personnalisables** (modèle, nombre de documents, score minimum, etc).
 
 ## Prérequis
 
 - Python 3.9+ 
-- Clé API Mistral (obtenue sur [console.mistral.ai](https://console.mistral.ai/))
+- Clé API Groq (avoir un compte et se diriger vers : https://console.groq.com/keys)
 - Avoir une solution de stockage en local (PostreSQL utilisé ici)
 
 ## Installation
@@ -46,7 +47,7 @@ code .
 Créez un fichier `.env` à la racine du projet avec le contenu suivant :
 
 ```
-MISTRAL_API_KEY=votre_clé_api_mistral
+GROQ_API_KEY=votre_clé_api_groq
 DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 ```
 
@@ -99,7 +100,9 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 ├── README.md                                  # Documentation du projet
 
 ```
-## Utilisation
+## Utilisation rapide
+Proposition ici d'une installation rapide pour visionner l'API Rest et l'interface Streamlit.
+Nous avons effectué beaucoup de changements entre le prototype et la nouvelle version alors dans le rapport technique nous irons en détail dans le fonctionnement et les explications de ce que nous utilisons dans cette nouvelle proposition du chatbot.
 
 ### 1. Ajouter des documents
 
@@ -109,50 +112,30 @@ Deux formats sont suportés pour le projet, il est possible de placer des docume
 - Les fichiers excel seront nettoyés et ajoutés dans une base de données relationnelle (PostreSQL utilisé ici).
 - Pour maintenir une cohérence et une fiabilité dans nos données, les fichiers excel doivent respecter un certain format (vous pouvez par exemple celui utilisé  dans data/raw).
 
+### 2. Génération des documents et de la base de données
+#### Pour la création des vecteurs des documents en PDF
+- Dans un premier temps assurez-vous d'avoir un dossier `vector_db/` dans le repo.
+- Deux solutions s'offrent à vous :
 
-### 2. Enregistrement des documents
-#### Indexer les documents (PDF)
-
-Exécutez le script d'indexation pour traiter les documents et créer l'index FAISS :
-
-```bash
-python build_index.py
+1. Lancer le script `scripts/build_index.py`
+Cela va permettre la génération des vecteurs dans le dossier `vector_db/`
+2. Lancer l'app.py
 ```
-Le fichier va s'appuyer sur les fonctions se trouvant dans **vector_store** & **embeddings**
-Ce script va :
-1. Charger les documents depuis le dossier `data/raw` avec le script data_loader.
-2. Découper les documents en chunks en appelant le script embeddings.
-Une fois le texte extrait (en mémoire après lancement de l’indexer,) il est trop long pour être envoyé tel quel à un LLM. Il faut le découper en morceaux digeste pour le modèle.
+poetry run python app.py
+```
+Puis ouvrez un navigateur et se rendre sur la documentation swagger de notre API
+```
+http://localhost:7860/docs
+```
+Ici vous pouvez générer la base d'index via le bouton `rebuild_index`.
+Cela va permettre également la génération des vecteurs dans le dossier `vector_db/`
 
-Utilisation de `Langchain` avec `RecursiveCharacterTextSplitter`
-
-**La stratégie utilisée ici :**
-
-- **`CHUNK_SIZE = 1500`** : Chaque morceau fait environ 1500 caractères (environ 300-400 mots).
-- **`CHUNK_OVERLAP = 150`** : Il y a un chevauchement de 150 caractères entre deux morceaux consécutifs.
-
- Cela permet d’éviter de couper une phrase importante en plein milieu. Si une phrase est coupée, la fin se retrouvera au début du morceau suivant grâce à l'overlap.
-3. Générer des embeddings avec Mistral
-**Script :** `rag/embeddings.py`
-C'est l'étape de traduction. L'ordinateur ne comprend pas le texte, il comprend les chiffres.
-- **Outil :** API Mistral (`mistral-embed`).
-- **Action :** Chaque découpage de texte est envoyé à Mistral, qui renvoie une liste de nombres (un vecteur) représentant le **sens** du texte.
-4. Créer un index FAISS pour la recherche sémantique
-**Script :** `rag/vector_store.py`
-- **Outil :** `FAISS` (Facebook AI Similarity Search).
-- **Action :** Tous ces vecteurs sont stockés dans un fichier `vector_db/faiss_index.idx`. C'est une base de données ultra-rapide optimisée pour trouver les vecteurs "voisins".
-- **Métadonnées :** En plus du vecteur, le script stocke le lien vers le fichier source (`filename: "Reddit 1.pdf"`, `page: 2`).
-- **`IndexFlatIP`** : Produit scalaire (cosine similarity après normalisation). Il fournit des résultats de recherche de voisins les plus proches exacts, ce qui le rend adapté aux applications où la précision est essentielle. le **produit scalaire** sert tout simplement à mesurer à quel point deux vecteurs se ressemblent.
-Pourquoi on utilise ça (au lieu de la distance) ? Le produit scalaire mesure l’**alignement.** Et dans les embeddings modernes (texte, images, IA) : des choses similaires pointent dans la même direction dans l’espace.
-5. Sauvegarder l'index et les chunks dans le dossier `vector_db/`
-
-#### Enregistrements des éléments chiffrés
-
+#### Pour la création de la base de données
 L'enregistrement des datas dans la base données se fait dans une base PostreSQL en local.
 1. Connexion à une base PostreSQL
 Choix de la BDD PostreSQL pour sa simplicité avec l'ORM SQLAlchemy.
-Création d'une bDD en local :
-a. Ouvrez votre terminal puis lancez les commandes une à une :
+Création d'une BDD en local :
+- Ouvrez votre terminal puis lancez les commandes une à une :
 ```
 psql
 CREATE DATABASE sportsee_nba_stats;
@@ -160,66 +143,24 @@ CREATE USER sportsee_user WITH PASSWORD '***';
 GRANT ALL PRIVILEGES ON DATABASE sportsee_nba_stats TO sportsee_user;
 ALTER DATABASE sportsee_nba_stats OWNER TO sportsee_user;
 ```
-b. Accès à la BDD
+- Accès à la BDD
 ```
 psql -U sportsee_user -d sportsee_nba_stats
 ```
-2. Initialisation de la base avec `database/creation_db`
-
-Ce script va nous permettre d'initialiser notre base afin qu'elle soit accessible. On utilise PostreSQL avc l'ORM SQLAlchemy pour faire le lien netre Python et PostrezSQL.
-On va y créer deux tables :
-- la table player : retrace les informations des joueurs (nom, âge, équipe)
-- la table stats : retrace les performances statistiques de chaque joueur.
-Exemple pour la table player :
-```
-class Player(Base):
-    """ Préparation d'une table avec les informations clés des joueurs (nom, âge) et leur équipe."""
-    __tablename__ = "player"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String,nullable=False, unique=True)
-    age = Column(Integer)
-    acronym_team = Column(String)
-    team = Column(String)
-
-    stats = relationship("Stats", back_populates="player_relation")
-```
-3. Nettoyage des fichiers excel
-Avant de pouvoir récupérer les informations dans les tables, il y a quelques ajustements à réaliser sur le fichier excel.
-- On doit procéder à du nettoyage sur le dataframe des statistiques des joueurs comme la suppression de colonnes vides ou encore le renommage de certaines colonnes.
-- On doit créer un fichier player car il n'existe pas en tant que tel dans les informations données par l'entreprise.
-- On prépare un fichier avec la définition des acronymes du noms des varibales statistiques pour qu'elles soient visibles dans les métadonnées.
-
-4. Lancement de `generation_db.py`
-Ce script va faire le lien entre le script creation_db et va permettre d'envoyer les données dans la BDD.
-- A l'interieur il est indiqué de prendre chaque ligne des nouveaux fichiers excel et de les ajouter.
-Exemple pour la table player :
-```
-# =====================================================
-# Enregistrement du nom des équipes NBA dans une table
-# =====================================================
-session_player = SessionLocal()
-for _, row in df_player.iterrows():
-    team = Player(
-        name=row["Player"],
-        age =row["Age"],
-        acronym_team = row["Team"],
-        team = row["Team_full_name"]
-    )
-    session_player.add(team)
-
-session_player.commit()
-session_player.close()
-```
+2. Initialisation de la base de données
+- Deux solutions s'offrent à vous :
+- Initialisation de la base de données avec `scripts/generation_db.py`
+Lancement de ce script va importer vos données excel dans votre base.
+- Initialisation de la base de données depuis l'API Rest :
+Depuis la documentation Swagger vous pouvez générer la base de données via le bouton `rebuild_SQL_Base`.
 - Les tables sont désormais à jour. Si vous avez installé pgAdmin, vous pouvz siualsier facilement l'intégration des données.
 
-![alt text](notebooks/graph/Moyenne_metriques_ragas.png)
 
 ## Rapport technique - du prototype au système actuel
 ### Reprise d'un prototype existant
 Pour mener à bien cette mission, nous avons eu à disposition un prototype du chatbot. Dans un premier temps l'objectif a été de comprendre ce qui a été fait, quelle structure nous avons et ensuite de passer à une évaluation du système actuel via une évaluation des métriques Ragas.
 ### Audit du prototype
-1. Organisation du projet
+1. **Organisation du projet**
 La structure de l'ancien fichier était la suivante :
 ```
 ├── inputs/                   # Dossier contenant les données à utiliser
@@ -240,52 +181,64 @@ La structure de l'ancien fichier était la suivante :
 ├── README.md                 # Documentation du projet
 ├── requirements.txt          # Fichier des dépendances
 ```
-2. Technologies utilisées
-Language : Python
-Interface : Streamlit
-LLM & Embeddings MistralAI (mistral-small-latest /mistral-embed)
-Orchestration : Langchain
-Gestion des dépendances : fichier requirements
-3. Lancement de l'interface
-Nous avons commencé par lancer le projet afin de voir si il était fonctionnel.
-On lance l'interface Streamlit. Sur votre terminal (bien vérifier que vous êtes dans le bon dossier)
+
+2. **Technologies utilisées**
+- Language : Python
+- Interface : Streamlit
+- LLM & Embeddings MistralAI (mistral-small-latest /mistral-embed)
+- Orchestration : Langchain
+- Gestion des dépendances : fichier requirements
+
+3. **Lancement de l'interface**
+- Nous avons commencé par lancer le projet afin de voir si il était fonctionnel.
+- On lance l'interface Streamlit. Sur votre terminal (bien vérifier que vous êtes dans le bon dossier)
 ```
 streamlit run MistralChat.py
 ```
-L'application fonctionne, on peut intéragir avec le chatbot et il propose des réponses argumentées.
-A ce stade il est difficile d'évaluer la cohérence et la pertinence des réponses apportées par le chatbot.
-4. Analyse des performances du système
+- L'application fonctionne, on peut intéragir avec le chatbot et il propose des réponses argumentées.
+- À ce stade il est difficile d'évaluer la cohérence et la pertinence des réponses apportées par le chatbot.
+
+4. **Analyse des performances du système**
+
 L'entreprise nous a signalé que les réponses n'étaient pas suffisantes pour eux. 
 Afin de s'en rendre compte nous allons évaluer le système avec les métriques de Ragas pour se faire notre propre avis.
-**Génération des questions/réponses**
+
+- **Génération des questions/réponses**
+
 L'objectif est d'évaluer le modèle avec ragas, pour cela il faut avoir un jeu de questions/réponses pour obtenir les métriques. 
-- Création du fichier **generation_answers.py** dans un nouveau dossier evaluations.
+Création du fichier **generation_answers.py** dans un nouveau dossier evaluations.
+
 On y retouve 15 questions et 15 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
 	- Questions faciles (valeurs directes)
 	- Questions intermédiaires (comparaison simple)
 	- Questions plus difficiles (questions bruitées)
-- A la suite de ces questions, nous appelons notre système pour obtenir les réponses du chatbot.
-- Dans le fichier csv généré (dans le dossier resultat_evaluation.csv) nous retrouvons en plus des questions/réponses (humaines + chatbot) :
+    
+À la suite de ces questions, nous appelons notre système pour obtenir les réponses du chatbot.
+
+Dans le fichier csv généré (dans le dossier resultat_evaluation.csv) nous retrouvons en plus des questions/réponses (humaines + chatbot) :
 	- la liste des contextes utilisés par le chatbot pour fournir une réponse (obligatoire pour ragas)
 	- le numéro des documents sélectionnés ainsi que son score de similarité
-**Lancement de l'évaluation ragas**
+- **Lancement de l'évaluation ragas**
 Nous chargeons les métriques que nous voulons utiliser pour évaluer le modèle (dans le fichier : first_ragas_evaluation.py) :
-- **faithfulness** Génération: fidèle au contexte ?
-- **answer_relevancy** Génération: réponse pertinente à la question ?
-- **context_precision** Récupération: contexte précis (peu de bruit) ?
-- **context_recall** Récupération: infos clés récupérées ?
+    - **faithfulness** Génération: fidèle au contexte ?
+    - **answer_relevancy** Génération: réponse pertinente à la question ?
+    - **context_precision** Récupération: contexte précis (peu de bruit) ?
+    - **context_recall** Récupération: infos clés récupérées ?
 
 Nous n'avons pas modifié le modèle afin d'évaluer le prototype tel quel, nous avons juste ajouté une instruction au prompt pour demander au LLM de faire des réponses courtes afin d'ajouter une certaine cohérence avec les réponses que nous avons généré de notre côté. Ensuite nous avons lancé l'évaluation.
 Ce qu'il se passe :
-- chaque question est analysée
-- génération de 4 colonnes supplémentaires (les 4 métriques) dans le csv 
-- Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
+    - chaque question est analysée
+    - génération de 4 colonnes supplémentaires (les 4 métriques) dans le csv 
+    - Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
 
-**Résultats de l'évaluation sur l'ensemble des questions**
+- **Résultats de l'évaluation sur l'ensemble des questions**
 Nous récupérons notre csv et nous avons décortiqué les résultats dans un notebook dédié.
 Nous avons déjà regardé les scores moyens au global sur les 15 questions :
+
 ![alt text](notebooks/graph/Moyenne_metriques_ragas.png)
-Sur ce graphique nous avons déjà de la manière pour une interprétation.
+
+Sur ce graphique nous avons déjà de la manière pour une interprétation :
+
 - On voit un score de "answer relevancy", pertinence de la réponse, élevé en moyenne avec 0.91. Pour rappel lors du calcul de cette métrique, le LLM va générer des questions implicites à partir de la réponse, il va comparer les questions avec la question originale et le score est basé sur la similarité sémantique.
     - Cela signifie que les réponses sont bien alignées sémantiquement avec la question. Par contre une réponse peut être pertinente mais fausse.
 - Le score de "faitfulness", la fidelité de la réponse, est très bas avec 0.12 en moyenne sur les 15 questions. Cette métrique permet de découper la réponse générée en affirmation factuelle. Pour chaque affirmation, il y a une vérification qu'elles sont bien supportées par au moins un contexte. 
@@ -295,26 +248,28 @@ Sur ce graphique nous avons déjà de la manière pour une interprétation.
 - Le score de "context_recall", avons-nous récupéré toutes les infos nécessaires, est bas avec 0.21 en moyenne. Ici le LLM va identifier les informations clés requises pour répondre à la question. Ensuite il va vérifier si elles apparaissent dans le context.
     - 0.21 signifie qu'on ne récupère pas les bons documents ou on ne récupère qu’une petite partie des informations nécessaires.
 
-En conlusion de la moyenne globale :
+- En conlusion de la moyenne globale :
 - la relevancy élevée montre que le LLM comprend bien la question.
 - la faithfulness très basse, il invente ou extrapole.
 - la precision basse, le retriever ramène du bruit.
 - le recall bas, il manque des infos clés.
 
-**Résultats de l'évaluation par type de question**
+- **Résultats de l'évaluation par type de question**
 Regardons les résultats par type de question :
-![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question.png)
-On voit avec ce graphique que les scores globaux sont tirés vers le haut par les questions simples.
-- Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bein supéreiurs sur ce type de question.
-- Sur les questions intermédiaires, c'est à dire des questions un peu plus longues, des questions avec des comparaisons simples, les scores se dégradent pour toutes les métriques. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
-- Sur les questions bruitées, cela reste des questions avec des réponses se trouvenat dans notre fichier excel mais elles sont volontairement moins explicites avec des formulations plus complexes, nous avons deux métriques à 0 (faithfulness et context_recall). Cela laisse paraître une mauvaise récupération des documents.
 
-**Conclusion de cette première évaluation ragas**
+![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question.png)
+
+On voit avec ce graphique que les scores globaux sont tirés vers le haut par les questions simples.
+    - Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bein supéreiurs sur ce type de question.
+    - Sur les questions intermédiaires, c'est à dire des questions un peu plus longues, des questions avec des comparaisons simples, les scores se dégradent pour toutes les métriques. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
+    - Sur les questions bruitées, cela reste des questions avec des réponses se trouvenat dans notre fichier excel mais elles sont volontairement moins explicites avec des formulations plus complexes, nous avons deux métriques à 0 (faithfulness et context_recall). Cela laisse paraître une mauvaise récupération des documents.
+
+- **Conclusion de cette première évaluation ragas**
 En regardant uniquement les réponses de l'interface du chatbot, il arrive à répondre à toutes les questions mais en analysant les réponses attendues et celles du chatbot ainsi que les résultats des métriques, on identifie très vite les limites du modèle actuel.
 Les scores démontrent un manque d'efficacité à récupérer les documents utiles pour apporter une réponse cohérente et factuelle et va s'appuyer sur une recherche internet que par notre système RAG.
 
 Nous avons alors regarder comment les docuemnts sont générés et nous avons identifier ce qui pourrait être le problème. 
 **Actuellement le modèle prend en compte le fichier excel comme un fichier texte.** En l'état, le modèle prend en compte les données en texte et va les découper, il va alors se "perdre" lors du retrieval et ne va pas être capable de porposer des calculs si par exemple on lui demande de calculer le nombre de points d'une équipe en particulier.
 
-**Définition de notre nouveau objectif**
+- **Définition de notre nouveau objectif**
 Une des étapes d'amélioration va être de créer une base de données pour y déposer notre fichier de statistique, cela va permettre une meilleure organisation et permettre le calcul des données si besoin.
