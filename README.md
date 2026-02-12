@@ -209,35 +209,35 @@ L'objectif est d'évaluer le modèle avec ragas, pour cela il faut avoir un jeu 
 Création du fichier **generation_answers.py** dans un nouveau dossier evaluations.
 
 On y retouve 15 questions et 15 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
-	- Questions faciles (valeurs directes)
-	- Questions intermédiaires (comparaison simple)
-	- Questions plus difficiles (questions bruitées)
+- Questions faciles (valeurs directes)
+- Questions intermédiaires (comparaison simple)
+- Questions plus difficiles (questions bruitées)
     
 À la suite de ces questions, nous appelons notre système pour obtenir les réponses du chatbot.
 
 Dans le fichier csv généré (dans le dossier resultat_evaluation.csv) nous retrouvons en plus des questions/réponses (humaines + chatbot) :
-	- la liste des contextes utilisés par le chatbot pour fournir une réponse (obligatoire pour ragas)
-	- le numéro des documents sélectionnés ainsi que son score de similarité
+- la liste des contextes utilisés par le chatbot pour fournir une réponse (obligatoire pour ragas)
+- le numéro des documents sélectionnés ainsi que son score de similarité
 - **Lancement de l'évaluation ragas**
 Nous chargeons les métriques que nous voulons utiliser pour évaluer le modèle (dans le fichier : first_ragas_evaluation.py) :
-    - **faithfulness** Génération: fidèle au contexte ?
-    - **answer_relevancy** Génération: réponse pertinente à la question ?
-    - **context_precision** Récupération: contexte précis (peu de bruit) ?
-    - **context_recall** Récupération: infos clés récupérées ?
+- **faithfulness** Génération: fidèle au contexte ?
+- **answer_relevancy** Génération: réponse pertinente à la question ?
+- **context_precision** Récupération: contexte précis (peu de bruit) ?
+- **context_recall** Récupération: infos clés récupérées ?
 
 Nous n'avons pas modifié le modèle afin d'évaluer le prototype tel quel, nous avons juste ajouté une instruction au prompt pour demander au LLM de faire des réponses courtes afin d'ajouter une certaine cohérence avec les réponses que nous avons généré de notre côté. Ensuite nous avons lancé l'évaluation.
 Ce qu'il se passe :
-    - chaque question est analysée
-    - génération de 4 colonnes supplémentaires (les 4 métriques) dans le csv 
-    - Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
+- chaque question est analysée
+- génération de 4 colonnes supplémentaires (les 4 métriques) dans le csv 
+- Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
 
-- **Résultats de l'évaluation sur l'ensemble des questions**
-Nous récupérons notre csv et nous avons décortiqué les résultats dans un notebook dédié.
-Nous avons déjà regardé les scores moyens au global sur les 15 questions :
+- #### **Résultats de l'évaluation sur l'ensemble des questions**
+- Nous récupérons notre csv et nous avons décortiqué les résultats dans un notebook dédié.
+- Nous avons déjà regardé les scores moyens au global sur les 15 questions :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas.png)
 
-Sur ce graphique nous avons déjà de la manière pour une interprétation :
+- Sur ce graphique nous avons déjà de la manière pour une interprétation :
 
 - On voit un score de "answer relevancy", pertinence de la réponse, élevé en moyenne avec 0.91. Pour rappel lors du calcul de cette métrique, le LLM va générer des questions implicites à partir de la réponse, il va comparer les questions avec la question originale et le score est basé sur la similarité sémantique.
     - Cela signifie que les réponses sont bien alignées sémantiquement avec la question. Par contre une réponse peut être pertinente mais fausse.
@@ -254,15 +254,15 @@ Sur ce graphique nous avons déjà de la manière pour une interprétation :
 - la precision basse, le retriever ramène du bruit.
 - le recall bas, il manque des infos clés.
 
-- **Résultats de l'évaluation par type de question**
-Regardons les résultats par type de question :
+- #### **Résultats de l'évaluation par type de question**
+- Regardons les résultats par type de question :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question.png)
 
-On voit avec ce graphique que les scores globaux sont tirés vers le haut par les questions simples.
-    - Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bein supéreiurs sur ce type de question.
-    - Sur les questions intermédiaires, c'est à dire des questions un peu plus longues, des questions avec des comparaisons simples, les scores se dégradent pour toutes les métriques. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
-    - Sur les questions bruitées, cela reste des questions avec des réponses se trouvenat dans notre fichier excel mais elles sont volontairement moins explicites avec des formulations plus complexes, nous avons deux métriques à 0 (faithfulness et context_recall). Cela laisse paraître une mauvaise récupération des documents.
+On voit avec ce graphique que les scores globaux sont tirés vers le haut par les questions simples :
+- Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bein supéreiurs sur ce type de question.
+- Sur les questions intermédiaires, c'est à dire des questions un peu plus longues, des questions avec des comparaisons simples, les scores se dégradent pour toutes les métriques. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
+- Sur les questions bruitées, cela reste des questions avec des réponses se trouvenat dans notre fichier excel mais elles sont volontairement moins explicites avec des formulations plus complexes, nous avons deux métriques à 0 (faithfulness et context_recall). Cela laisse paraître une mauvaise récupération des documents.
 
 - **Conclusion de cette première évaluation ragas**
 En regardant uniquement les réponses de l'interface du chatbot, il arrive à répondre à toutes les questions mais en analysant les réponses attendues et celles du chatbot ainsi que les résultats des métriques, on identifie très vite les limites du modèle actuel.
