@@ -25,3 +25,4 @@ MistralChat.py
 pyproject.toml
 test.py
 notebooks/notebook_evaluation_ragas.ipynb
+.logfire
