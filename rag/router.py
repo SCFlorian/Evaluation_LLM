@@ -42,6 +42,8 @@ class Router:
            - Utilise ceci pour : Moyennes, totaux, classements, âges, équipes actuelles.
            - Mots-clés : "Combien", "Score", "Stats", "Meilleur marqueur", "Qui a le plus de...".
            - Ex: "Combien de points a Lebron ?", "Qui est le meilleur rebondeur ?", "Dans quelle équipe joue Curry ?"
+           - Si la question demande un classement, un "meilleur", un "top", ou une exclusion basée sur des chiffres (matchs, points), C'EST DU SQL.
+            Même si le mot "restant" est utilisé.
 
         2. "VECTOR" : Pour le TEXTE, l'HISTOIRE, les RÈGLES et les CONDITIONS SPÉCIFIQUES.
            - Utilise ceci pour : Règlements, explications ("pourquoi", "comment"), avis de fans, rumeurs.

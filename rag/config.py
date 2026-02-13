@@ -14,7 +14,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # --- Modèles ---
 # LLM : On utilise Llama via Groq
-MODEL_NAME = "openai/gpt-oss-20b"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 # Embeddings : On utilise un modèle HuggingFace 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"

@@ -77,6 +77,9 @@ class SQLTool:
         Q: Quel est le nombre total de points de Shai ?
         SQL: SELECT "Player", SUM("PTS") FROM "stats" WHERE "Player" LIKE '%Shai%' GROUP BY "Player";
 
+        7. RÈGLE SUPPLEMENTAIRE:
+        Si la question compare deux joueurs ou plus, utilise WHERE Player IN ('Joueur1', 'Joueur2') pour récupérer les stats de TOUS les joueurs mentionnés.
+        
         Question utilisateur : {question}
         SQL :
         """

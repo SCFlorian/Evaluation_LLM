@@ -273,3 +273,13 @@ Nous avons alors regarder comment les documents sont générés et nous avons id
 
 - **Définition de notre nouveau objectif**
 Une des étapes d'amélioration va être de créer une base de données pour y déposer notre fichier de statistique, cela va permettre une meilleure organisation et permettre le calcul des données si besoin.
+
+## Résultats ragas seconde évaluation
+
+#### Moyenne global des métriques
+
+![alt text](notebooks/graph/Moyenne_metriques_ragas_seconde_eval.png)
+
+#### Moyenne par type de question
+
+![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question_seconde_eval.png)
