@@ -14,7 +14,6 @@ __init__.py
 poetry.lock
 
 # A ignore pour le moment
-data/processed
 vector_db/
 MistralChat.py
 pyproject.toml
