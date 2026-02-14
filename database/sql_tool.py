@@ -61,6 +61,13 @@ class SQLTool:
            - INCORRECT : SELECT name, age FROM player
         4. Ne réponds QUE par le code SQL. Pas de blabla.
 
+        5. COMPARAISON DE JOUEURS PRÉCIS (Noms cités). SEULEMENT SI IL N'Y A PAS BEAUCOUP D'ELEMENTS
+        - Déclencheur : "Entre X et Y", "Qui de X ou Y", "X vs Y".
+        - Action : Utilise `WHERE "Player" IN ('Nom1', 'Nom2')`.
+        - Règle LIMIT : INTERDIT. (Je veux voir les lignes de tous les joueurs cités).
+        -> Ex: "Qui a le plus de points entre Shai et Luka ?" 
+           => SELECT "Player", "PTS" FROM "stats" WHERE "Player" IN ('Shai Gilgeous-Alexander', 'Luka Doncic');
+
         5. RÈGLE CRUCIALE POUR LE SELECT (CONTEXTE) :
         - Ne sélectionne JAMAIS une seule colonne de chiffres.
         - Sélectionne TOUJOURS la colonne 'Player' (ou 'Team') EN PREMIER, puis la statistique demandée.
@@ -77,8 +84,6 @@ class SQLTool:
         Q: Quel est le nombre total de points de Shai ?
         SQL: SELECT "Player", SUM("PTS") FROM "stats" WHERE "Player" LIKE '%Shai%' GROUP BY "Player";
 
-        7. RÈGLE SUPPLEMENTAIRE:
-        Si la question compare deux joueurs ou plus, utilise WHERE Player IN ('Joueur1', 'Joueur2') pour récupérer les stats de TOUS les joueurs mentionnés.
         
         Question utilisateur : {question}
         SQL :
@@ -122,5 +127,5 @@ class SQLTool:
 if __name__ == "__main__":
     tool = SQLTool()
     
-    q = "Quel est le meilleur marqueur avec le moins de matchs joués ?"
+    q = "Parmi les joueurs ayant dépassé les 2000 points, lequel a joué le moins de matchs ?"
     tool.run_query(q)

@@ -35,8 +35,8 @@ from rag.config import GROQ_API_KEY, MODEL_NAME
 # ==============
 # Configuration
 # ==============
-INPUT_CSV = "data/processed/second_eval_results.csv"      
-OUTPUT_CSV = "data/processed/second_eval_ragas.csv"   
+INPUT_CSV = "data/processed/second_eval_results_test.csv"      
+OUTPUT_CSV = "data/processed/second_eval_ragas_test.csv"   
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2" 
 PAUSE_SECONDS = 30                      
 

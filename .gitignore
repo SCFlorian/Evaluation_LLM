@@ -15,9 +15,4 @@ poetry.lock
 
 # A ignore pour le moment
 vector_db/
-MistralChat.py
-pyproject.toml
-test.py
 .logfire
-test_2.py
-test_3.py

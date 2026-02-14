@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "evaluation-performances-llm"
+version = "0.1.0"
+description = "Projet RAG Hybride NBA"
+authors = ["Florian <florian@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.13,<3.15"
+
+# --- Le Coeur ---
+langchain = "1.2.10"
+langchain-community = "0.4.1"
+langchain-core = "1.2.10"
+
+# --- Les Nouveaux Moteurs (Gratuits) ---
+langchain-groq = "1.1.2"
+langchain-huggingface = "1.2.0"
+sentence-transformers = "5.2.2"
+
+# --- Base de données Vectorielle ---
+faiss-cpu = "1.13.2"
+
+# --- Data & Outils ---
+pandas = "2.3.3"
+openpyxl = "3.1.5"
+python-dotenv = "1.2.1"
+tqdm = "4.67.3"
+
+# --- PDF & OCR ---
+pymupdf = "1.26.7"
+easyocr = "1.7.2"
+pillow = "12.1.0"
+
+# --- Base de données SQL ---
+sqlalchemy = "2.0.46"
+
+# --- Interface ---
+streamlit = "1.54.0"
+watchdog = "6.0.0"
+
+# --- Evaluation ---
+ragas = "0.4.3"
+datasets = "4.5.0"
+
+# --- Anciens outils ---
+mistralai = "1.9.11"
+langchain-text-splitters = "1.1.0"
+opentelemetry-sdk = "1.39.1"
+opentelemetry-api = "1.39.1"
+logfire = {extras = ["langchain", "system-metrics"], version = "4.23.0"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

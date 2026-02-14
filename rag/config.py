@@ -40,4 +40,4 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # --- App Config ---
 APP_TITLE = "NBA Analyst AI"
 NAME = "NBA"
-CSV_FILE="data/processed/second_eval_results.csv"
+CSV_FILE="data/processed/second_eval_results_test.csv"

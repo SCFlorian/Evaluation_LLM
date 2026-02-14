@@ -12,6 +12,7 @@ import logfire
 # Cela configure tout automatiquement
 logfire.configure()
 logfire.instrument_pydantic()
+logfire.instrument_system_metrics()
 # Configuration & Chemins
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Imports du repo
@@ -70,10 +71,10 @@ class ChatPipeline:
         df_dict_clean = dict_def_stats()
         start_time = time.time()
         logging.info(f" Nouvelle question : {question}")
-
+        with logfire.span("Router Decision"):
         # 1. ROUTAGE
-        route = self.router.route_query(question)
-        logging.info(f"Décision du routeur : {route}")
+            route = self.router.route_query(question)
+            logging.info(f"Décision du routeur : {route}")
 
         context_text = ""
         
@@ -109,7 +110,8 @@ class ChatPipeline:
             # ============
             if route in ["VECTOR", "BOTH"]:
                 # 1. On récupère la liste des documents
-                docs = self.retriever.retrieve(question)
+                with logfire.span("Vector Retrieval"):
+                    docs = self.retriever.retrieve(question)
                 
                 # 2. On prépare le texte pour le LLM
                 doc_raw = "\n\n".join([d.page_content for d in docs])
@@ -191,16 +193,10 @@ def response(prompt: str):
 if __name__ == "__main__":
     print("\n--- TEST DU CHAT PIPELINE ---")
     
-    q1 = "Quel est le meilleur marqueur avec le moins de matchs joués ?"
+    q1 = "Quelle est la franchise la plus ancienne de la NBA selon le fil 'TodayILearned' et quel était son nom d'origine ?"
     print(f"\nQ: {q1}")
     res1 = chatbot.process_question(q1)
     print(f"Route: {res1['route']}")
     print(f"R: {res1['answer']}")
 
     print("-" * 20)
-
-    q2 = "Quelles sont les règles des playoffs ?"
-    print(f"\nQ: {q2}")
-    res2 = chatbot.process_question(q2)
-    print(f"Route: {res2['route']}")
-    print(f"R: {res2['answer']}")
