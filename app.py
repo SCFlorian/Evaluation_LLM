@@ -19,7 +19,6 @@ from rag.config import INPUT_DIR
 # ========================
 # Activation de notre API
 # ========================
-
 app = FastAPI(title="SportSee - Prototype chatbot")
 # ====================
 # Modèle d'entrée API

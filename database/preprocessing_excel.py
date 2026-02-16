@@ -4,7 +4,6 @@
 # =======================
 import pandas as pd
 import datetime as dt
-
 # ======================================================================
 # Création d'un nouveau fichier pour avoir les informations des joueurs
 # ======================================================================

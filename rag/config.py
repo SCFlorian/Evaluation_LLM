@@ -41,3 +41,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 APP_TITLE = "NBA Analyst AI"
 NAME = "NBA"
 CSV_FILE="data/processed/second_eval_results_test.csv"
+
+# --- Configuration RAGAS ---
+INPUT_CSV = "data/processed/second_eval_results_test.csv"      
+OUTPUT_CSV = "data/processed/second_eval_ragas_test.csv"   
+EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2" 

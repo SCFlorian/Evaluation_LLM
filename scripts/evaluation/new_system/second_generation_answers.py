@@ -15,7 +15,7 @@ import time
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(root_dir)
-PAUSE_SECONDS = 20
+PAUSE_SECONDS = 30
 # Imports du repo
 from scripts.chat import ChatPipeline
 from rag.config import CSV_FILE
@@ -46,23 +46,26 @@ questions_reponses = [
     {"n":"Question simple","i": "Q3","q": "Quel est le pourcentage de réussite au tir de Giannis Antetokounmpo ?","a": "Giannis Antetokounmpo affiche un pourcentage de réussite au tir de 60.1%."},
     {"n":"Question simple","i": "Q4","q": "Quel est le nombre total de passes décisives (AST) réalisées par Tyrese Haliburton ?","a": "Tyrese Haliburton a délivré un total de 672 passes décisives durant la saison."},
     {"n":"Question simple","i": "Q5","q": "Pour quelle équipe (Team) joue Nikola Jokić ?","a": "Nikola Jokić joue pour les Denver Nuggets (DEN)."},
-    # --- NIVEAU 2 : Questions intermédiaires (comparaison simple) ---
-    {"n":"Question compliquée","i": "Q6","q": "Quel joueur a marqué le plus de points entre Anthony Edwards et Nikola Jokić ?","a": "Anthony Edwards a marqué plus de points qu'Nikola Jokić, avec 2180 points contre 2072."},
-    {"n":"Question compliquée","i": "Q7","q": "Quel joueur a joué le plus de matchs entre Shai Gilgeous-Alexander et Giannis Antetokounmpo ?","a": "Shai Gilgeous-Alexander a joué plus de matchs avec 76 rencontres contre 67 pour Giannis Antetokounmpo."},
-    {"n":"Question compliquée","i": "Q8","q": "Qui affiche le meilleur pourcentage de réussite au tir (FG%) entre Stephen Curry et Anthony Edwards ?","a": "Stephen Curry affiche un meilleur pourcentage de réussite au tir avec 44.8% contre 44.7% pour Anthony Edwards."},
-    {"n":"Question compliquée","i": "Q9","q": "Quel joueur a distribué le plus de passes décisives entre Shai Gilgeous-Alexander et Tyrese Haliburton ?","a": "Tyrese Haliburton a distribué plus de passes décisives avec 672 contre 486 pour Shai Gilgeous-Alexander."},
-    {"n":"Question compliquée","i": "Q10","q": "Combien de points Jayson Tatum a-t-il inscrits cette saison ?","a": "Jayson Tatum a inscrit un total de 1930 points durant la saison."},
-    # --- NIVEAU 3 : Questions plus difficiles (classement / analyse simple) ---
-    {"n":"Question bruitée","i":"Q11","q":"Parmi les joueurs ayant dépassé les 2000 points, lequel a joué le moins de matchs ?","a":"Giannis Antetokounmpo est celui qui a joué le moins de matchs avec 67 tout en dépassant les 2000 points."},
-    {"n":"Question bruitée","i":"Q12","q":"Quel joueur combine plus de 2000 points et un pourcentage de réussite au tir supérieur à 55% ?","a":"Giannis Antetokounmpo est le seul joueur à combiner plus de 2000 points et un FG en pourcentage supérieur à 55%."},
-    {"n":"Question bruitée","i":"Q13","q":"Si l’on exclut les joueurs ayant disputé plus de 75 matchs, qui est le meilleur marqueur restant ?","a":"En excluant les joueurs à plus de 75 matchs, Shai Gilgeous-Alexander reste le meilleur marqueur avec 2485 points."},
-    {"n":"Question bruitée","i":"Q14","q":"Quel joueur marque en moyenne le plus de points par match parmi ceux ayant joué moins de 70 matchs ?","a":"Giannis Antetokounmpo est celui qui marque le plus par match parmi les joueurs à moins de 70 matchs."},
-    {"n":"Question bruitée","i":"Q15","q":"Un analyste affirme que le meilleur marqueur est aussi celui ayant joué le plus de matchs. Cette affirmation est-elle correcte ?","a":"Non, le meilleur marqueur est Shai Gilgeous-Alexander (2485 points), mais celui qui a joué le plus de matchs est Anthony Edwards avec 79 matchs."},
-    # --- NIVEAU 4 : Questions sur Reddit ---
-    {"n":"Question reddit","i": "Q16","q": "Quelle est la franchise la plus ancienne de la NBA selon le fil 'TodayILearned' et quel était son nom d'origine ?","a": "La franchise la plus ancienne est les Sacramento Kings, fondés en 1923 sous le nom de Rochester Seagrams."},
-    {"n":"Question reddit","i": "Q17","q": "Qu'a noté Luka Doncic concernant l'avantage du terrain dans les séries de playoffs récentes ?","a": "Luka Doncic a noté que c'est la première fois qu'il aura l'avantage du terrain dans une série de playoffs."},
-    {"n":"Question reddit","i": "Q18","q": "Pourquoi certains fans considèrent-ils que l'affrontement entre les deux meilleures équipes statistiques est ennuyeux ?","a": "À cause d'un biais médiatique et d'un mauvais marketing de la NBA qui préfère les concours de popularité au basket pur."}
+    {"n":"Question simple","i": "Q6","q": "Quelle est la franchise la plus ancienne de la NBA selon le fil 'TodayILearned' et quel était son nom d'origine ?","a": "La franchise la plus ancienne est les Sacramento Kings, fondés en 1923 sous le nom de Rochester Seagrams."},
+
+    # --- NIVEAU 2 : Questions intermédiaires (comparaison) ---
+    {"n":"Question compliquée","i": "Q7","q": "Quel joueur a marqué le plus de points entre Anthony Edwards et Nikola Jokić ?","a": "Anthony Edwards a marqué plus de points qu'Nikola Jokić, avec 2180 points contre 2072."},
+    {"n":"Question compliquée","i": "Q8","q": "Quel joueur a joué le plus de matchs entre Shai Gilgeous-Alexander et Giannis Antetokounmpo ?","a": "Shai Gilgeous-Alexander a joué plus de matchs avec 76 rencontres contre 67 pour Giannis Antetokounmpo."},
+    {"n":"Question compliquée","i": "Q9","q": "Qui affiche le meilleur pourcentage de réussite au tir (FG%) entre Stephen Curry et Anthony Edwards ?","a": "Stephen Curry affiche un meilleur pourcentage de réussite au tir avec 44.8% contre 44.7% pour Anthony Edwards."},
+    {"n":"Question compliquée","i": "Q10","q": "Quel joueur a distribué le plus de passes décisives entre Shai Gilgeous-Alexander et Tyrese Haliburton ?","a": "Tyrese Haliburton a distribué plus de passes décisives avec 672 contre 486 pour Shai Gilgeous-Alexander."},
+    {"n":"Question compliquée","i": "Q11","q": "Combien de points Jayson Tatum a-t-il inscrits cette saison ?","a": "Jayson Tatum a inscrit un total de 1930 points durant la saison."},
+    {"n":"Question compliquée","i": "Q12","q": "Sur Reddit, des fans expliquent qu'une finale entre les deux meilleures équipes statistiques serait un 'snoozefest'. Pourquoi les médias de la NBA sont-ils accusés de provoquer ce désintérêt ? Et qui a marqué le plus de points (PTS) entre Jayson Tatum et Shai Gilgeous-Alexander ?","a": "Les médias sont accusés de privilégier un concours de popularité ('popularity contest') et de promouvoir les superstars plutôt que le pur niveau de basketball. C'est Shai Gilgeous-Alexander (2485 PTS) qui a marqué plus de points que Jayson Tatum (1930 PTS)."},
+    {"n":"Question compliquée","i": "Q13","q": "Qu'a noté Luka Doncic concernant l'avantage du terrain dans les séries de playoffs récentes ?","a": "Luka Doncic a noté que c'est la première fois qu'il aura l'avantage du terrain dans une série de playoffs."},
+    # --- NIVEAU 3 : Questions plus difficiles (classement) ---
+    {"n":"Question bruitée","i":"Q14","q":"Je regardais un classement des meilleurs scoreurs récents et j’ai remarqué que plusieurs joueurs avaient dépassé les 2000 points cette saison. Mais comme certains ont joué plus de matchs que d’autres, je me demandais : parmi ces gros scoreurs, lequel a atteint ce total tout en ayant disputé le moins de matchs ?","a":"Giannis Antetokounmpo est celui qui a joué le moins de matchs avec 67 tout en dépassant les 2000 points."},
+    {"n":"Question bruitée","i":"Q15","q":"Je lisais des débats sur les meilleures équipes de la conférence Est des années 90, et je me posais une question : selon un post Reddit, quel joueur des Pacers est considéré comme la première option offensive la plus efficace de l'histoire des playoffs NBA ?","a": "Selon les discussions sur Reddit, c'est Reggie Miller qui est considéré comme la première option offensive la plus efficace de l'histoire des playoffs NBA."},
+    {"n":"Question bruitée","i":"Q16","q":"Je comparais récemment les performances de plusieurs scoreurs cette saison, mais je voulais éviter les joueurs qui ont joué énormément de matchs, car cela peut gonfler les totaux. Si on ne considère que les joueurs ayant disputé 75 matchs ou moins, quel joueur reste le meilleur marqueur de la saison ?","a":"En excluant les joueurs ayant disputé plus de 75 matchs, Nikola Jokić est le meilleur marqueur restant avec 2072 points."},
+    {"n":"Question bruitée","i":"Q17","q":"Quel joueur marque en moyenne le plus de points par match parmi ceux ayant joué moins de 70 matchs ?","a":"Giannis Antetokounmpo est celui qui marque le plus par match parmi les joueurs à moins de 70 matchs."},
+    {"n":"Question bruitée","i":"Q18","q":"Un analyste affirme que le meilleur marqueur est aussi celui ayant joué le plus de matchs. Cette affirmation est-elle correcte ?","a":"Non, le meilleur marqueur est Shai Gilgeous-Alexander (2485 points), mais celui qui a joué le plus de matchs est Anthony Edwards avec 79 matchs."},
+    {"n":"Question bruitée","i": "Q19","q": "Un utilisateur Reddit déclare : 'Ant's been a machine as expected' en parlant d'Anthony Edwards. Comment juge-t-il les performances de ce joueur ? Et qui a inscrit le plus de points (PTS) au total entre Anthony Edwards et Jalen Brunson ?","a": "Il estime que le joueur répond parfaitement aux attentes et joue comme une machine. C'est Anthony Edwards (2180 PTS) qui a marqué le plus de points, devant Jalen Brunson (1690 PTS)."},
+    {"n":"Question bruitée","i": "Q20","q": "Sur Reddit, un fan de Duke qualifie le duo d'Orlando de 'absolute dogs'. Pourquoi pense-t-il qu'ils sont parfaitement taillés pour les playoffs ? Et qui a joué le plus de matchs entre Franz Wagner et Paolo Banchero ?","a": "Il pense qu'ils sont taillés pour les playoffs grâce à leur capacité à créer des tirs et à rivaliser défensivement. C'est Franz Wagner (60 matchs) qui a joué plus de matchs (GP) que Paolo Banchero (46 matchs)."}
     ]
+
 
 # ===============================================
 # Lancement de la génération des réponses du LLM

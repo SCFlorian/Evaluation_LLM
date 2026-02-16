@@ -10,6 +10,7 @@ import pandas as pd
 import logging
 import json
 import time
+import logfire
 from dotenv import load_dotenv
 # Imports Ragas
 from datasets import Dataset
@@ -29,17 +30,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(root_dir)
 # Import du repo
-from rag.config import GROQ_API_KEY, MODEL_NAME
-
+from rag.config import GROQ_API_KEY, MODEL_NAME, INPUT_CSV, OUTPUT_CSV, EMBEDDING_MODEL_NAME
 
 # ==============
 # Configuration
 # ==============
-INPUT_CSV = "data/processed/second_eval_results_test.csv"      
-OUTPUT_CSV = "data/processed/second_eval_ragas_test.csv"   
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2" 
 PAUSE_SECONDS = 30                      
-
+logfire.configure()
 # Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 
@@ -106,7 +103,9 @@ def main():
         logging.info(f"--- Question {i+1}/{len(ragas_dataset)} ---")
         
         try:
-            # On évalue cette question
+            question_en_cours = batch["question"][0]
+            
+            # 1. On évalue
             score = evaluate(
                 dataset=batch,
                 metrics=metrics,
@@ -114,15 +113,29 @@ def main():
                 embeddings=embeddings_model,
                 raise_exceptions=False
             )
-            # On stocke le résultat
-            results_list.append(score.to_pandas())
+            
+            # 2. On convertit en Pandas
+            df_score = score.to_pandas()
+            results_list.append(df_score)
+            
+            # 3. On extrait les scores du dataframe et on les envoie à Logfire
+            score_dict = df_score.iloc[0].to_dict()
+            
+            with logfire.span(
+                f"RAGAS: Question {i+1}", 
+                question=question_en_cours,
+                faithfulness=score_dict.get('faithfulness', None),
+                answer_relevancy=score_dict.get('answer_relevancy', None),
+                context_precision=score_dict.get('context_precision', None),
+                context_recall=score_dict.get('context_recall', None)
+            ):
+                pass # Logfire crée la trace avec les scores et se referme
             
             # Sécurité
             time.sleep(PAUSE_SECONDS)
             
         except Exception as e:
             logging.error(f" Erreur sur la question {i+1} : {e}")
-            # On ajoute une ligne vide pour garder le bon nombre de lignes
             results_list.append(pd.DataFrame([{"error": str(e)}]))
 
     # 5. Fusion et sauvegarde
@@ -135,11 +148,17 @@ def main():
         df_final.to_csv(OUTPUT_CSV, index=False)
         logging.info(f"\n Terminé ! Les résultats complets sont dans : {OUTPUT_CSV}")
         
-        # Affichage des moyennes
-        print("\n=== SCORES MOYENS (GROQ) ===")
+        # AJOUT LOGFIRE : Préparation et envoi des métriques
+        metriques_logfire = {}
         for m in ['faithfulness', 'answer_relevancy', 'context_precision', 'context_recall']:
             if m in df_final.columns:
-                print(f"{m}: {df_final[m].mean():.4f}")
+                moyenne = float(df_final[m].mean())
+                metriques_logfire[m] = moyenne
+                print(f"{m}: {moyenne:.4f}")
+                
+        if metriques_logfire:
+            with logfire.span("Campagne d'Évaluation RAGAS", **metriques_logfire):
+                pass
     else:
         logging.error("Aucun résultat n'a pu être généré.")
 

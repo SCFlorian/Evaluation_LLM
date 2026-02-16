@@ -115,7 +115,7 @@ def main():
             results_list.append(batch_result.to_pandas())
             
             # --- LA PAUSE CRUCIALE ---
-            if i + BATCH_SIZE < total_questions: # On ne fait pas de pause après la dernière question
+            if i + BATCH_SIZE < total_questions:
                 logging.info(f"Pause de {PAUSE_SECONDS}s pour l'API...")
                 time.sleep(PAUSE_SECONDS)
                 

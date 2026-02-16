@@ -68,11 +68,11 @@ class SQLTool:
         -> Ex: "Qui a le plus de points entre Shai et Luka ?" 
            => SELECT "Player", "PTS" FROM "stats" WHERE "Player" IN ('Shai Gilgeous-Alexander', 'Luka Doncic');
 
-        5. RÈGLE CRUCIALE POUR LE SELECT (CONTEXTE) :
+        6. RÈGLE CRUCIALE POUR LE SELECT (CONTEXTE) :
         - Ne sélectionne JAMAIS une seule colonne de chiffres.
         - Sélectionne TOUJOURS la colonne 'Player' (ou 'Team') EN PREMIER, puis la statistique demandée.
 
-        6. RÈGLE ANTI-ERREUR (GROUPING ERROR) :
+        7. RÈGLE ANTI-ERREUR (GROUPING ERROR) :
         - Si tu utilises une fonction d'agrégation (SUM, AVG, COUNT, MAX, MIN) en même temps qu'une colonne de texte (comme "Player"), tu DOIS ajouter une clause GROUP BY.
         - INCORRECT : SELECT "Player", SUM("PTS") FROM "stats" WHERE "Player" = 'Shai';
         - CORRECT   : SELECT "Player", SUM("PTS") FROM "stats" WHERE "Player" = 'Shai' GROUP BY "Player";

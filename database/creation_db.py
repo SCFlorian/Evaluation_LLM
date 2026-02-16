@@ -1,4 +1,4 @@
-    # CREATION DE NOTRE BASE DE DONNÉES
+# CREATION DE NOTRE BASE DE DONNÉES
 # =======================
 # Librairies nécessaires
 # =======================
@@ -6,6 +6,7 @@ from sqlalchemy import (create_engine, Column, Integer, Float, String, ForeignKe
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import sys,os
+# Configuration & Chemins
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from rag.config import DATABASE_URL
 # ======================

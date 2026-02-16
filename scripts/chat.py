@@ -6,6 +6,7 @@ import logging
 import sys, os
 import time
 import logfire
+
 # ======================
 # CONFIGURATION LOGFIRE
 # ======================
@@ -13,8 +14,10 @@ import logfire
 logfire.configure()
 logfire.instrument_pydantic()
 logfire.instrument_system_metrics()
+
 # Configuration & Chemins
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Imports du repo
 from rag.router import Router
 from database.sql_tool import SQLTool
@@ -39,17 +42,27 @@ class ChatPipeline:
     """
     def __init__(self):
         logging.info("Initialisation du ChatPipeline (Chargement des modèles)...")
-        try:
-            # 1. Le Routeur (Choisit entre SQL et Texte)
-            self.router = Router()
-            # 2. L'outil SQL (Interroge la BDD)
-            self.sql_tool = SQLTool()
-            # 3. Le Retriever (Cherche dans les PDF)
-            self.retriever = RetrievalService()
-            logging.info("ChatPipeline prêt !")
-        except Exception as e:
-            logging.error(f"Erreur critique lors du chargement du Pipeline : {e}")
-            raise e
+        
+        # On crée un span global pour chronométrer tout le démarrage
+        with logfire.span("Démarrage du Système (Initialisation)"):
+            try:
+                # 1. Le Routeur
+                with logfire.span("Chargement du Routeur"):
+                    self.router = Router()
+                
+                # 2. L'outil SQL
+                with logfire.span("Connexion Base de Données (SQLTool)"):
+                    self.sql_tool = SQLTool()
+                
+                # 3. Le Retriever
+                with logfire.span("Chargement Base Vectorielle (Retriever)"):
+                    self.retriever = RetrievalService()
+                
+                logging.info("ChatPipeline prêt !")
+            except Exception as e:
+                logging.error(f"Erreur critique lors du chargement du Pipeline : {e}")
+                raise e
+
     @logfire.instrument("Traitement Pipeline: {question}")
     def process_question(self, question: str):
         """
@@ -58,19 +71,22 @@ class ChatPipeline:
         # ==========================================
         # 1. VALIDATION ENTRÉE (Check Pydantic)
         # ==========================================
-        try:
-            InputData(question=question)
-        except ValidationError:
-            # Si invalide, on renvoie une réponse d'erreur tout de suite
-            return {
-                "answer": "Erreur : La question est vide ou trop courte.",
-                "route": "ERREUR",
-                "context": "", "definitions": {}, "sources": []
-            }
+        with logfire.span("1. Validation Entrée (Pydantic)"):
+            try:
+                InputData(question=question)
+            except ValidationError:
+                # Si invalide, on renvoie une réponse d'erreur tout de suite
+                return {
+                    "answer": "Erreur : La question est vide ou trop courte.",
+                    "route": "ERREUR",
+                    "context": "", "definitions": {}, "sources": []
+                }
+                
         # Chargement du fichier excel pour les métadonnées (définition des colonnes stats)
         df_dict_clean = dict_def_stats()
         start_time = time.time()
         logging.info(f" Nouvelle question : {question}")
+        
         with logfire.span("Router Decision"):
         # 1. ROUTAGE
             route = self.router.route_query(question)
@@ -91,20 +107,21 @@ class ChatPipeline:
             # BLOC SQL
             # =========
             if route in ["SQL", "BOTH"]:
-                raw_data = self.sql_tool.run_query(question)
-                used_definitions = df_dict_clean
-                glossary_text = ", ".join([f"{k}={v}" for k, v in df_dict_clean.items()])
-                sources_finales.append({"type": "database", "data": raw_data})
-                
-                sql_section = (
-                    f"DONNÉES SQL (SOURCE OFFICIELLE) : {raw_data}\n"
-                    f"CONSIGNE TECHNIQUE : Ces données sont le résultat brut d'une requête SQL exécutée spécifiquement pour répondre à la question : '{question}'.\n"
-                    f"AIDE GLOSSAIRE : {glossary_text}\n"
-                    f"RÈGLE D'INTERPRÉTATION : \n"
-                    f"- Si la question demande un classement ou un superlatif, et que tu ne vois que quelques résultats, c'est NORMAL (LIMIT SQL appliqué).\n"
-                    f"- N'indique pas que les données viennent de la base SQL ou autre.\n"
-                    f"- Ne dis JAMAIS 'je ne peux pas savoir'. Fais confiance à ce résultat.\n"
-                )
+                with logfire.span("2. Exécution Requête SQL"):
+                    raw_data = self.sql_tool.run_query(question)
+                    used_definitions = df_dict_clean
+                    glossary_text = ", ".join([f"{k}={v}" for k, v in df_dict_clean.items()])
+                    sources_finales.append({"type": "database", "data": raw_data})
+                    
+                    sql_section = (
+                        f"DONNÉES SQL (SOURCE OFFICIELLE) : {raw_data}\n"
+                        f"CONSIGNE TECHNIQUE : Ces données sont le résultat brut d'une requête SQL exécutée spécifiquement pour répondre à la question : '{question}'.\n"
+                        f"AIDE GLOSSAIRE : {glossary_text}\n"
+                        f"RÈGLE D'INTERPRÉTATION : \n"
+                        f"- Si la question demande un classement ou un superlatif, et que tu ne vois que quelques résultats, c'est NORMAL (LIMIT SQL appliqué).\n"
+                        f"- N'indique pas que les données viennent de la base SQL ou autre.\n"
+                        f"- Ne dis JAMAIS 'je ne peux pas savoir'. Fais confiance à ce résultat.\n"
+                    )
             # ============
             # BLOC VECTOR
             # ============
@@ -150,9 +167,10 @@ class ChatPipeline:
             context_text = "Une erreur est survenue lors de la récupération des données."
 
         # 3. GÉNÉRATION
-        logging.info("Génération de la réponse...")
-        api_messages = list_for_api(context_text, question)
-        final_answer = generer_reponse(api_messages)
+        with logfire.span("3. Génération Réponse LLM (Groq)"):
+            logging.info("Génération de la réponse...")
+            api_messages = list_for_api(context_text, question)
+            final_answer = generer_reponse(api_messages)
 
         elapsed = time.time() - start_time
         logging.info(f"Réponse générée en {elapsed:.2f}s")
@@ -160,10 +178,11 @@ class ChatPipeline:
         # ======================================
         # 2. VALIDATION SORTIE (Check Pydantic)
         # ======================================
-        try:
-            OutputData(answer=final_answer, route=route, sources=sources_finales)
-        except ValidationError as e:
-            logging.error(f"ATTENTION : Erreur format sortie détectée : {e}")
+        with logfire.span("4. Validation Sortie (Pydantic)"):
+            try:
+                OutputData(answer=final_answer, route=route, sources=sources_finales)
+            except ValidationError as e:
+                logging.error(f"ATTENTION : Erreur format sortie détectée : {e}")
 
         return {
             "answer": final_answer,

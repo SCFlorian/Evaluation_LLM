@@ -1,4 +1,4 @@
-# MISE EN PLACE DU ROUTEUR POUX CHOIX DE LA RECUPERATION DES DONNEES
+# MISE EN PLACE DU ROUTEUR POUR CHOIX DE LA RECUPERATION DES DONNEES
 # =======================
 # Librairies nécessaires
 # =======================
