@@ -29,7 +29,7 @@ tqdm = "4.67.3"
 # --- PDF & OCR ---
 pymupdf = "1.26.7"
 easyocr = "1.7.2"
-pillow = "12.1.0"
+pillow = "12.1.1"
 
 # --- Base de données SQL ---
 sqlalchemy = "2.0.46"
