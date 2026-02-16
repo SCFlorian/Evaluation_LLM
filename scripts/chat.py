@@ -75,6 +75,7 @@ class ChatPipeline:
             try:
                 InputData(question=question)
             except ValidationError:
+                logfire.error("Validation Pydantic Échouée", error=str(e))
                 # Si invalide, on renvoie une réponse d'erreur tout de suite
                 return {
                     "answer": "Erreur : La question est vide ou trop courte.",
@@ -182,6 +183,7 @@ class ChatPipeline:
             try:
                 OutputData(answer=final_answer, route=route, sources=sources_finales)
             except ValidationError as e:
+                logfire.error("Validation Pydantic Échouée", error=str(e))
                 logging.error(f"ATTENTION : Erreur format sortie détectée : {e}")
 
         return {

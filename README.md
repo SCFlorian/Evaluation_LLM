@@ -534,3 +534,6 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
 ![alt text](notebooks/screenshot/temps_dashboard.png)
 
+#### Affichage si le schéma pydantic n'est pas respecté :
+
+![alt text](notebooks/screenshot/erreur_pydantic.png)
