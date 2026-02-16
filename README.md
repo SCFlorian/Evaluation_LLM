@@ -1,8 +1,8 @@
 # Assistant RAG avec Llama
 
 Ce projet implémente un assistant virtuel basé sur un modèle Llama, utilisant la technique de Retrieval-Augmented Generation (RAG) pour fournir des réponses précises et contextuelles à partir d'une base de connaissances personnalisée.
-L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à quelques améliorations afin d'obtenir des meilleurs résultats.
-Les améliorations seront visibles avec une comparaison des métriques ragas sur le prototype vs la nouvelle structuration du projet.
+L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à des améliorations afin d'obtenir des meilleurs résultats.
+Les améliorations seront visibles avec une comparaison des métriques ragas sur le prototype vs la nouvelle structure du projet.
 
 ## Fonctionnalités
 
@@ -56,10 +56,13 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 ```
 .
 ├── data/                                      # Dossier contenant nos fichiers csv d'évaluation
-│   └── processed/  
+│   └── processed/                             # Création de nouveaux fichiers csv 
+│       ├──concat_eval_ragas.csv               # Tableau récapitulatif avec les deux évaluations Ragas
 │       ├──first_ragas_results.csv             # Résultats de la première évaluation ragas
-│       ├──resultat_evaluation.csv             # Génération des questions/réponses
-│   └── raw/                                   # Scripts de génération des évaluations
+│       ├──first_eval_results.csv              # Génération des questions/réponses de la première évaluation
+│       ├──second_ragas_results.csv            # Résultats de la deuxième évaluation ragas
+│       ├──second_eval_results.csv             # Génération des questions/réponses de la deuxième évaluation
+│   └── raw/                                   # Les éléments de base du projet
 │       ├──Reddit 1.pdf                        # Premier fichier Reddit
 │       ├──Reddit 2.pdf                        # Deuxième fichier Reddit
 │       ├──Reddit 3.pdf                        # Troisième fichier Reddit
@@ -67,38 +70,43 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 │       ├──regular NBA.xlsx                    # Fichier excel avec les statistiques par joueur
 ├── database/                                  # Création et génération de la BDD
 │   ├──creation_db.py                          # Script avec les classes de nos tables
-│   ├──generation_db.py                        # Génération de notre BDD et ajout du fichier excel
+│   ├──preprocessing_excel.py                  # Script préparant les fichiers excel (dont nettoyage) pour la BDD
 │   ├──sql_tool.py                             # Préparation de la chaîne pour récupérer les informations depuis la BDD
-├── evaluations/                               # Scripts de génération des évaluations
-│   ├──first_ragas_evaluation.py               # Script de la première évaluation ragas
-│   ├──generation_answers.py                   # Script de la génération des questions/réponses
 ├── notebooks/                                 # Dossier contenant les notebooks pour une meilleure compréhension des données
-│   ├──notebook_analyse_exploratoire.ipynb     # Notebook sur la préparation du fichier excel pour les évaluations
-├── rag/                                       # Scripts contenant les fonctions du projet
-│   ├──cleaning_excel.py                       # Script préparant les fichiers excel (dont nettoyage) pour la BDD
+│   └── graph/                                 # Dossier contenant les graphiques utilisés pour la documentation
+│   ├──notebook_analyse_excel.ipynb            # Notebook sur la préparation du fichier excel pour les évaluations
+│   ├──notebook_evaluation_ragas.ipynb         # Notebook sur la préparation des résultats des évaluations des métriques ragas
+├── rag/                                       # Scripts contenant les fonctions du système RAG
 │   ├──config.py                               # Script contenant les configurations (le nom des paramètres, des modèles etc)
 │   ├──creation_llm.py                         # Script contenant la création du LLM (initialisation du modèle, génération de la réponse)
 │   ├──data_loader.py                          # Script contenant le chargement des documents
+│   ├──embeddings.py                           # Script contenant les différentes fonctions allant de la création des découpages à la création des vecteurs
 │   ├──retrieval.py                            # Script contenant la recherche dans la documentation
-│   ├──schema_validation.py                    # Script contenant les schémas de validation Pydantic
-│   ├──vector_store.py                         # Script contenant les différentes fonctions allant de la création des découpages à l'enregistrement des vecteurs
-├── scripts/                                   # Dossier avec l'enregistrement de notre base vectorielle
-│   ├──build_index.py                          # Les documents découpés en format pkl
-│   ├──chat.py                                 # la base d'index FAISS
-│   ├──generation_db.py                        # la base d'index FAISS
+│   ├──router.py                               # Script contenant le choix par un "agent" de décider si le RAG va chercher les infos dans la BDD ou la base vectorielle
+│   ├──vector_store.py                         # Script contenant l'enregistrement des vecteurs
+├── scripts/                                   # Scripts généraux
+│   └── evaluations/                           # Dossier contenant les scripts des évaluations des métriques ragas
+│       ├──new_system                          # À l'intérieur on retrouve un fichier de génération des questions/réponses et un fichier évaluant les métriques pour le nouveau projet
+│           ├──second_generation_answers.py    # Génération des questions/réponses pour la deuxième évaluation
+│           ├──second_ragas_evaluation.py      # Génération des métriques ragas pour la deuxième évaluation
+│       ├──prototype                           # À l'intérieur on retrouve un fichier de génération des questions/réponses et un fichier évaluant les métriques pour le prototype
+│           ├──second_generation_answers.py    # Génération des questions/réponses pour la première évaluation
+│           ├──second_ragas_evaluation.py      # Génération des métriques ragas pour la première évaluation
+│   ├──build_index.py                          # Script de création de la base vectorielle
+│   ├──chat.py                                 # Script de génération de la réponse du chatbot
+│   ├──generation_db.py                        # Script de génération de la base de données
 ├── tests/                                     # Dossier avec l'enregistrement de notre base vectorielle
-│   ├──valisation_pydantic.py                  # Les documents découpés en format pkl
+│   ├──valisation_pydantic.py                  # Tests d'entrées/sorties et des chunk avec Pydantic
 ├── vector_db/                                 # Dossier avec l'enregistrement de notre base vectorielle
-│   ├──document_chunks.pkl                     # Les documents découpés en format pkl
-│   ├──faiss_index.idx                         # la base d'index FAISS
+│   ├──faiss_index.pkl                         # Les documents découpés en format pkl
+│   ├──faiss_index.faiss                       # la base d'index FAISS
 ├── .env                                       # Enregistrement des informations qui ne doivent pas être publiées
 ├── .gitignore                                 # Permet de ne pas afficher les éléments sélectionnés sur GitHub
 ├── app.py                                     # Orchestre la vectorisation et la sauvegarde
-├── MistralChat.py                             # Script pour le lancement de l'API et de l'interface avec Streamlit
+├── InterfaceChat.py                           # Script pour le lancement de l'API et de l'interface avec Streamlit
 ├── poetry.lock                                # Pas versionné sur Git
 ├── pyproject.toml                             # Gestion des dépendances Poetry
 ├── README.md                                  # Documentation du projet
-
 ```
 ## Utilisation rapide
 Proposition ici d'une installation rapide pour visionner l'API Rest et l'interface Streamlit.
@@ -153,14 +161,17 @@ psql -U sportsee_user -d sportsee_nba_stats
 Lancement de ce script va importer vos données excel dans votre base.
 - Initialisation de la base de données depuis l'API Rest :
 Depuis la documentation Swagger vous pouvez générer la base de données via le bouton `rebuild_SQL_Base`.
-- Les tables sont désormais à jour. Si vous avez installé pgAdmin, vous pouvz siualsier facilement l'intégration des données.
+- Les tables sont désormais à jour. Si vous avez installé pgAdmin, vous pouvez visualiser facilement l'intégration des données.
 
 
-## Rapport technique - du prototype au système actuel
-### Reprise d'un prototype existant
-Pour mener à bien cette mission, nous avons eu à disposition un prototype du chatbot. Dans un premier temps l'objectif a été de comprendre ce qui a été fait, quelle structure nous avons et ensuite de passer à une évaluation du système actuel via une évaluation des métriques Ragas.
+# Rapport technique - du prototype au système actuel
+## Reprise d'un prototype existant
+
+Pour mener à bien cette mission, nous avons eu à disposition un prototype du chatbot. Dans un premier temps l'objectif a été de comprendre ce qui a été fait, quelle structure nous avons et nous sommes passé ensuite à une évaluation du système actuel via une évaluation des métriques Ragas.
+
 ### Audit du prototype
 1. **Organisation du projet**
+
 La structure de l'ancien fichier était la suivante :
 ```
 ├── inputs/                   # Dossier contenant les données à utiliser
@@ -200,24 +211,28 @@ streamlit run MistralChat.py
 
 4. **Analyse des performances du système**
 
-L'entreprise nous a signalé que les réponses n'étaient pas suffisantes pour eux. 
-Afin de s'en rendre compte nous allons évaluer le système avec les métriques de Ragas pour se faire notre propre avis.
+L'entreprise nous a signalé que les réponses n'étaient pas suffisantes pour eux. Elle a confié que les résultats sur les archives textuelles étaient encourageantes mais ils deviennent moins bons en interrogeant avec des questions plus précises sur les statistiques par exemple.
+Afin de s'en rendre compte nous allons évaluer le système avec les métriques Ragas pour se faire notre propre avis.
 
 - **Génération des questions/réponses**
 
 L'objectif est d'évaluer le modèle avec ragas, pour cela il faut avoir un jeu de questions/réponses pour obtenir les métriques. 
-Création du fichier **generation_answers.py** dans un nouveau dossier evaluations.
+Création du fichier **generation_answers.py** dans un nouveau dossier scripts/evaluation (vous le trouverez dans le dossier prototype)
 
-On y retouve 15 questions et 15 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
+On y retouve 20 questions et 20 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
 - Questions faciles (valeurs directes)
 - Questions intermédiaires (comparaison simple)
 - Questions plus difficiles (questions bruitées)
+- Vu la demande de l'entreprise, on a réalisé plus de question sur la partie statistique :
+    - 14 questions sur le fichier excel
+    - 3 questions sur les fichiers reddit
+    - 3 questions sur le couple excel/reddit
     
-À la suite de ces questions, nous appelons notre système pour obtenir les réponses du chatbot.
+**À la suite de ces questions, nous appelons notre système pour obtenir les réponses du chatbot.**
 
 Dans le fichier csv généré (dans le dossier resultat_evaluation.csv) nous retrouvons en plus des questions/réponses (humaines + chatbot) :
 - la liste des contextes utilisés par le chatbot pour fournir une réponse (obligatoire pour ragas)
-- le numéro des documents sélectionnés ainsi que son score de similarité
+- le numéro des documents sélectionnés
 - **Lancement de l'évaluation ragas**
 Nous chargeons les métriques que nous voulons utiliser pour évaluer le modèle (dans le fichier : first_ragas_evaluation.py) :
 - **faithfulness** Génération: fidèle au contexte ?
@@ -232,21 +247,22 @@ Ce qu'il se passe :
 - Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
 
 #### **Résultats de l'évaluation sur l'ensemble des questions**
+
 - Nous récupérons notre csv et nous avons décortiqué les résultats dans un notebook dédié.
 - Nous avons déjà regardé les scores moyens au global sur les 15 questions :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas.png)
 
-- Sur ce graphique nous avons déjà de la manière pour une interprétation :
+- Sur ce graphique nous avons déjà de la matière pour une interprétation :
 
-- On voit un score de "answer relevancy", pertinence de la réponse, élevé en moyenne avec 0.91. Pour rappel lors du calcul de cette métrique, le LLM va générer des questions implicites à partir de la réponse, il va comparer les questions avec la question originale et le score est basé sur la similarité sémantique.
+- On voit un score de "answer relevancy", pertinence de la réponse, élevé en moyenne avec 0.92. Pour rappel lors du calcul de cette métrique, le LLM va générer des questions implicites à partir de la réponse, il va comparer les questions avec la question originale et le score est basé sur la similarité sémantique.
     - Cela signifie que les réponses sont bien alignées sémantiquement avec la question. Par contre une réponse peut être pertinente mais fausse.
-- Le score de "faitfulness", la fidelité de la réponse, est très bas avec 0.12 en moyenne sur les 15 questions. Cette métrique permet de découper la réponse générée en affirmation factuelle. Pour chaque affirmation, il y a une vérification qu'elles sont bien supportées par au moins un contexte. 
+- Le score de "faitfulness", la fidelité de la réponse, est très bas avec 0.17 en moyenne sur les 20 questions. Cette métrique permet de découper la réponse générée en affirmation factuelle. Pour chaque affirmation, il y a une vérification qu'elles soient bien supportées par au moins un contexte. 
     - Le score atteste que les affirmations de la réponse ne sont pas beaucoup appuyées sur le contexte généré. Cela peut indiquer des hallucinations importantes.
-- Le score de "context_precision", les documents récupérés sont-ils utiles, est aussi bas avec 0.24 en moyenne. Pour chaque contexte,le LLM juge “Ce contexte est-il nécessaire pour répondre à la question ?”.
-    - Un score de 0.24 signifie beaucoup de documents récupérés et peu pertinents.Le système de retrieval ramène beaucoup de bruit.
-- Le score de "context_recall", avons-nous récupéré toutes les infos nécessaires, est bas avec 0.21 en moyenne. Ici le LLM va identifier les informations clés requises pour répondre à la question. Ensuite il va vérifier si elles apparaissent dans le context.
-    - 0.21 signifie qu'on ne récupère pas les bons documents ou on ne récupère qu’une petite partie des informations nécessaires.
+- Le score de "context_precision", les documents récupérés sont-ils utiles, est aussi bas avec 0.20 en moyenne. Pour chaque contexte,le LLM juge “Ce contexte est-il nécessaire pour répondre à la question ?”.
+    - Un score de 0.20 signifie beaucoup de documents récupérés et peu pertinents. Le système de retrieval ramène beaucoup de bruit.
+- Le score de "context_recall", avons-nous récupéré toutes les infos nécessaires, est bas avec 0.33 en moyenne. Ici le LLM va identifier les informations clés requises pour répondre à la question. Ensuite il va vérifier si elles apparaissent dans le context.
+    - 0.33 signifie qu'on ne récupère pas les bons documents ou on ne récupère qu’une petite partie des informations nécessaires.
 
 - En conlusion de la moyenne globale :
 - la relevancy élevée montre que le LLM comprend bien la question.
@@ -260,26 +276,261 @@ Ce qu'il se passe :
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question.png)
 
 On voit avec ce graphique que les scores globaux sont tirés vers le haut par les questions simples :
-- Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bein supéreiurs sur ce type de question.
-- Sur les questions intermédiaires, c'est à dire des questions un peu plus longues, des questions avec des comparaisons simples, les scores se dégradent pour toutes les métriques. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
-- Sur les questions bruitées, cela reste des questions avec des réponses se trouvenat dans notre fichier excel mais elles sont volontairement moins explicites avec des formulations plus complexes, nous avons deux métriques à 0 (faithfulness et context_recall). Cela laisse paraître une mauvaise récupération des documents.
+- Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort légèrement mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bein supéreiurs sur ce type de question.
+- Sur les questions compliquées et bruitées, c'est à dire des questions un peu plus longues, et des questions volontairement moins explicites, les scores se dégradent. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
 
 - **Conclusion de cette première évaluation ragas**
 En regardant uniquement les réponses de l'interface du chatbot, il arrive à répondre à toutes les questions mais en analysant les réponses attendues et celles du chatbot ainsi que les résultats des métriques, on identifie très vite les limites du modèle actuel.
 Les scores démontrent un manque d'efficacité à récupérer les documents utiles pour apporter une réponse cohérente et factuelle et va s'appuyer sur une recherche internet que par notre système RAG.
 
-Nous avons alors regarder comment les documents sont générés et nous avons identifier ce qui pourrait être le problème. 
+Nous avons alors regardé comment les documents sont générés et nous avons identifié ce qui pourrait être le problème. 
 **Actuellement le modèle prend en compte le fichier excel comme un fichier texte.** En l'état, le modèle prend en compte les données en texte et va les découper, il va alors se "perdre" lors du retrieval et ne va pas être capable de porposer des calculs si par exemple on lui demande de calculer le nombre de points d'une équipe en particulier.
 
-- **Définition de notre nouveau objectif**
-Une des étapes d'amélioration va être de créer une base de données pour y déposer notre fichier de statistique, cela va permettre une meilleure organisation et permettre le calcul des données si besoin.
+## Mise en place de la nouvelle structure
 
-## Résultats ragas seconde évaluation
+L'idée n'a pas été de repartir totalement d'une page blanche. Il y a désormais une nouvelle structure avec des fonctions bien séparées et plus modulables.
+
+1. **Technologies utilisées**
+- Language : Python
+- Interface : Streamlit
+- LLM : utilisation de Groq et choix du modèle llama-3.3-70b-versatile
+    - Groq va nous permettre de pouvoir utilsier d'autres modèles si besoin et surtout permet une meilleure visibilité sur les coûts générés
+- Embeddings : utilisation de HuggingFaceEmbeddings pour la création des vecteurs et choix de l'index FLatL2 de FAISS pour la base vectorielle
+- Orchestration : Langchain
+- Gestion des dépendances : environnement poetry
+
+2. **Définition de notre nouveau objectif**
+Dans un premier temps nous avons amélioré la structure de notre projet. Ensuite nous avons ajouté des améliorations comme la mise en place d'une base de données et une méthode supplémentaire de récupération des données. Nous verrons également comment nous suivons les résultats et les performances du système.
+
+3. **Nouvelle organisation du projet**
+
+Désormais nous avons une organisation plus fluide, nous avons mis en place par exemple :
+- un environnement géré par poetry
+- un dossier rag qui va être le coeur du projet avec tous les scripts nécessaires pour faire tourner le système RAG
+- un dossier database qui va permttre la création de notre base de données
+- un dossier `scripts` avec 3 scripts principaux qui vont regrouper les fonctions principales :
+    - build_index qui va construire ou reconstruire la base vectorielle
+    - chat qui permet de générer la réponse du chatbot
+    - generation_db qui va permettre de créer ou mettre à jour la base de données SQL
+- Mise en place d'un fichier app pour la mise en place de notre API Rest qui est en plus de l'interface Streamlit.
+
+4. **Mise en place de la base de données**
+
+Nous avons détaillé l'installation de la base de données un peu plus haut. Nous avons fait le choix d'utiliser une base en local pour le moement avec PostreSQL. 
+Après avoir initialisée et générée la base de données comme indiqué en introduction, nous avons une BDD sur laquelle s'appuyer.
+Dans le pipeline de la BDD, avant d'être intégrées, les données du fichier excel sont préalablement nettoyées automatiquement avec le script `preprocessing_excel.py`.
+
+Nous avons désormais 2 tables sur lesquelles notre système RAG va pouvoir prendre de l'information.
+
+- La table `player`, où l'on va retrouver les informations d'un joueur de la NBA avec son âge et l'équipe où il joue.
+
+![alt text](notebooks/screenshot/table_player.png)
+
+- La table `stats`, où l'on va retrouver les statistiques par jour (nombre de matchs, nombre de points etc).
+
+![alt text](notebooks/screenshot/table_stats.png)
+
+- Dans la table `stats`, nous voyons que les catégories sont des acronymes alors nous retrouverons la définition de ces derniers dans les métadonnées pour aider le modèle à ne pas se tromper lorsqu'il sélectionnera une colonne en particulier.
+
+5. **Mise en place d'un routeur pour sélectionner les bonnes données**
+
+Maintenant nous avons 2 sources de données, une provenant d'une base vectorielle et une autre d'une base de données.
+
+L'approche n'est plus la même que dans le prototype, il faut mettre en place un **agent** qui va prendre la décision si la question répond à un besoin pour une requête SQL, une récupération dans les vecteurs ou dans les 2 bases.
+
+C'est le script `routeur` qui va prendre cette décision via un prompt strcturé dans une chaîne LCEL.
+Voici le prompt utilisé pour la génération du choix :
+```
+ template = """
+        Tu es un expert en classification de questions pour un assistant NBA.
+        Ton rôle est d'orienter la question vers la bonne source de données.
+
+        SOURCES DISPONIBLES :
+
+        1. "SQL" : Pour les STATISTIQUES PURES, les RECORDS et les FAITS SIMPLES.
+           - Utilise ceci pour : Moyennes, totaux, classements, âges, équipes actuelles.
+           - Mots-clés : "Combien", "Score", "Stats", "Meilleur marqueur", "Qui a le plus de...".
+           - Ex: "Combien de points a Lebron ?", "Qui est le meilleur rebondeur ?", "Dans quelle équipe joue Curry ?"
+           - Si la question demande un classement, un "meilleur", un "top", ou une exclusion basée sur des chiffres (matchs, points), C'EST DU SQL.
+            Même si le mot "restant" est utilisé.
+
+        2. "VECTOR" : Pour le TEXTE, l'HISTOIRE, les RÈGLES et les CONDITIONS SPÉCIFIQUES.
+           - Utilise ceci pour : Règlements, explications ("pourquoi", "comment"), avis de fans, rumeurs.
+           - IMPORTANT : Si une question demande "Qui a gagné..." avec une CONDITION NARRATIVE ou un CONTEXTE HISTORIQUE (ex: "sans avantage du terrain", "le plus jeune MVP", "après une blessure", "le plus petit joueur"), c'est du VECTOR. La base SQL ne contient que des noms et des chiffres, pas ces détails.
+           - Ex: "Quelles sont les règles des playoffs ?", "Quelle équipe a gagné en 1995 sans l'avantage du terrain ?", "Que pensent les fans de Gobert ?"
+
+        3. "BOTH" : Uniquement si la question demande CLAIREMENT deux choses distinctes (Chiffre + Texte).
+           - Ex: "Donne moi les stats de Wembanyama et une analyse de son impact médiatique."
+
+        Instructions :
+        - Analyse la question ci-dessous.
+        - Réponds UNIQUEMENT par un seul mot : SQL, VECTOR, ou BOTH.
+
+        Question utilisateur : {question}
+        Catégorie :
+        """
+```
+En fonction de ce que va choisir cet "agent", dans le script "chat.py" nous avons mis en place la marche à suivre en cas de choix de la base SQL, des vecteurs ou les deux.
+
+Exemple pour la base SQL :
+```
+            # BLOC SQL
+            # =========
+            if route in ["SQL", "BOTH"]:
+                with logfire.span("2. Exécution Requête SQL"):
+                    raw_data = self.sql_tool.run_query(question)
+                    used_definitions = df_dict_clean
+                    glossary_text = ", ".join([f"{k}={v}" for k, v in df_dict_clean.items()])
+                    sources_finales.append({"type": "database", "data": raw_data})
+                    
+                    sql_section = (
+                        f"DONNÉES SQL (SOURCE OFFICIELLE) : {raw_data}\n"
+                        f"CONSIGNE TECHNIQUE : Ces données sont le résultat brut d'une requête SQL exécutée spécifiquement pour répondre à la question : '{question}'.\n"
+                        f"AIDE GLOSSAIRE : {glossary_text}\n"
+                        f"RÈGLE D'INTERPRÉTATION : \n"
+                        f"- Si la question demande un classement ou un superlatif, et que tu ne vois que quelques résultats, c'est NORMAL (LIMIT SQL appliqué).\n"
+                        f"- N'indique pas que les données viennent de la base SQL ou autre.\n"
+                        f"- Ne dis JAMAIS 'je ne peux pas savoir'. Fais confiance à ce résultat.\n")
+```
+
+Ensuite la réponse sera reformulée par le LLM.
+
+6. **Évaluation de notre nouveau système**
+
+Nous avons testé le nouveau système RAG avec les 20 mêmes questions/réponses pour pouvoir comparer les deux.
+
+On commence par générer `second_generation_answers.py` :
+
+```
+python -m scripts.evaluation.new_system.second_generation_answers
+```
+
+Lorsque nous avons la **réponse du LLM** en plus des questions/réponses, on lance `second_ragas_evaluation.py` :
+
+```
+python -m scripts.evaluation.new_system.second_ragas_eveluation
+```
+
+7. **Résultats de la seconde évaluation ragas**
 
 #### Moyenne global des métriques
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_seconde_eval.png)
 
+- Sur l'ensemble des 4 métriques, nous avons des résultats solides qui démontrent des réponses cohérentes et documentés sur les 20 questions que nous avons posé.
+
 #### Moyenne par type de question
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question_seconde_eval.png)
+
+On apercoit une certaine logique avec :
+- les meilleurs scores pour les questions simples.
+- une légère diminution pour les questions un peu plus compliquées.
+- Et une baisse un peu plus prononcé pour les questions bruitées par rapport au simple.
+
+On note facilement pour les perspectives que nous devons encore amélioré notre système pour sécuriser les questions bruitées.
+
+## Comparaison entre les 2 systèmes avec les métriques ragas
+
+Prenons la moyenne des 20 questions :
+
+![alt text](notebooks/graph/Moyenne_metriques_ragas_type_eval.png)
+
+Nous voyons clairement une amélioration significatve de notre modèle.
+- Sur faitfulness, context_recall et context_precision, les métriques se sont améliorés et prouvent :
+    - une meilleur qualité de récupération des documents
+    - les docuements récupérés sont utiles
+    - les affirmations des réponses sont basées sur des faits
+- Le score pour answer_relevancy a baissé par rapport à la première évaluation :
+    - mais il reste bon en étant supérieur à 0.80
+    - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
+    - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinent à la question.
+
+## Suivre les performances
+
+Nous avons décidé d'inclure Pydantic Logfire. Logfire est une plateforme qui permet de :
+- collecter les logs (messages générés par un programme),
+- visualiser ce qui se passe dans une application en temps réel,
+- détecter et diagnostiquer les erreurs et bugs,
+- analyser les performances d’un système.
+
+Logfire est un outil pour surveiller, comprendre et déboguer une application grâce aux logs.
+
+#### **Mise en place dans notre système RAG** 
+
+Afin de pouvoir visualiser pas à pas le fonctionnement de la chaîne RAG/LLM lors de son exécution. Il va nous permettre également d'avoir des dashboard pour s'assurer des bonnes performances de notre modèle.
+
+Pour bénéficier de Logfire, il faut avoir créer un compte :
+```
+https://logfire.pydantic.dev
+```
+
+Il faut également l'initier, lors de votre premier lancement sur un projet, il va vous demander de faire quelques actions, suivi les instructions.
+
+Nous avons utiliser les commandes principales de Logfire pour tracker notre projet :
+
+```
+# Configure Logfire avec les paramètres par défaut.
+# Cette instruction initialise la connexion à la plateforme Logfire et permet
+# de commencer la collecte et l’envoi des logs générés par l’application.
+logfire.configure()
+
+# Active l’instrumentation automatique de Pydantic.
+# Cette fonctionnalité permet d’enregistrer les opérations liées à la validation
+# des données, notamment les succès et les erreurs de validation des modèles.
+# Cela facilite le débogage et le suivi des flux de données dans l’application.
+logfire.instrument_pydantic()
+
+# Active la collecte des métriques système.
+# Cette instruction permet de surveiller les ressources système telles que
+# l’utilisation du CPU, de la mémoire et d’autres indicateurs de performance.
+# Ces informations sont utiles pour analyser les performances et détecter
+# d’éventuels problèmes liés à l’exécution de l’application.
+logfire.instrument_system_metrics()
+
+# Crée un span Logfire pour tracer l’exécution d’un bloc de code.
+# Un span représente une unité de travail ou une opération spécifique
+# dans l’application, par exemple une requête, un calcul ou un appel de fonction.
+# Il permet de mesurer la durée d’exécution et d’enregistrer des informations
+# associées à cette opération pour faciliter l’analyse et le débogage.
+with logfire.span("Router Decision"):
+```
+
+**Utilisation de logfire span** dans le `chat.py` et le `second_evaluation_ragas.py` :
+
+- Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
+
+![alt text](notebooks/screenshot/logfire_traitement_question.png)
+
+
+- Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
+    - par question :
+
+![alt text](notebooks/screenshot/logfire_questions_ragas.png)
+
+    - au global :
+
+![alt text](notebooks/screenshot/logfire_ragas_total.png)
+
+#### Visualation avec des dashboard
+
+Logfire nous permet de suivre plusieurs élements de notre projet comme :
+
+- process count & system CPU
+
+![alt text](notebooks/screenshot/systeme_dashboard.png)
+
+- Les erreurs rencontrées
+
+![alt text](notebooks/screenshot/erreurs_dashboard.png)
+
+#### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les mettre en dashboard
+
+- Nombre de tokens utilisés :
+
+![alt text](notebooks/screenshot/tokens_dashboard.png)
+
+- Comparaison du temps par question sur la dernière question posée vs la moyenne du temps par question :
+
+![alt text](notebooks/screenshot/temps_dashboard.png)
+
