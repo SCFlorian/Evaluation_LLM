@@ -16,7 +16,7 @@
 11. [Validation des données avec Pydantic](#validation-des-données-avec-pydantic)
 12. [API & Documentation Swagger](#api--documentation-swagger)
 13. [Intéraction avec le chatbot](#intéraction-avec-le-chatbot)
-14. [Conclusions & Perspectives](#conclusions-&-perspectives)
+14. [Conclusions et Perspectives](#conclusions-et-perspectives)
 
 ---
 
