@@ -1,0 +1,36 @@
+# Image de base
+FROM python:3.13-slim
+
+# Installation des dépendances système minimales
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installation de Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# Ajout Poetry au PATH
+ENV PATH="/root/.local/bin:$PATH"
+
+# Désactiver virtualenv Poetry (Docker est déjà isolé)
+RUN poetry config virtualenvs.create false
+
+# Dossier de travail
+WORKDIR /app
+
+# Copier les dépendances
+COPY pyproject.toml poetry.lock ./
+
+# Installer dépendances
+RUN poetry install --no-interaction --no-ansi --no-root
+
+# Copier le reste du projet
+COPY . .
+
+# Exposer port Streamlit
+EXPOSE 7860
+
+# IMPORTANT : lancer Streamlit et rien d'autre
+CMD ["streamlit", "run", "InterfaceChat.py", "--server.port=7860", "--server.address=0.0.0.0"]

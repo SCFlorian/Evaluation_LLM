@@ -182,6 +182,29 @@ Lancement de ce script va importer vos données excel dans votre base.
 Depuis la documentation Swagger vous pouvez générer la base de données via le bouton `rebuild_SQL_Base`.
 - Les tables sont désormais à jour. Si vous avez installé pgAdmin, vous pouvez visualiser facilement l'intégration des données.
 
+#### Pour lancer le projet, vous avez plusieurs options :
+
+- La méthode privilégiée pour exécuter l'interface est **Docker**, garantissant un environnement isolé et stable.
+1. Prérequis
+- Docker installé sur votre machine.
+- Une clé API Groq active.
+2. Construction (Build)
+- Construction de l'image
+```
+docker build -t sportsee-streamlit .
+```
+3. Lancement (Run)
+- Démarrez le conteneur en lui passant les variables d'environnement :
+```
+docker run -d \
+  --name sportsee-streamlit \
+  -p 7860:7860 \
+  --env-file .env \
+  sportsee-streamlit
+```
+
+On peut également générer le projet via la documentation swagger de FastAPI : détails dans [API & Documentation Swagger](#api--documentation-swagger)
+
 
 # Rapport technique - du prototype au système actuel
 ## Reprise d'un prototype existant

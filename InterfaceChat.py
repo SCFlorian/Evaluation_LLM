@@ -8,12 +8,8 @@ import sys, os
 # Imports
 from rag.retrieval import RetrievalService
 from rag.creation_llm import generer_reponse
-from scripts.chat import ChatPipeline
+from scripts.chat import chatbot
 # On charge la réponsé du chatbot
-try:
-    chatbot = ChatPipeline()
-except Exception:
-    chatbot = None
 
 # --- Configuration de la Page ---
 st.set_page_config(page_title="Assistant NBA (Groq)", page_icon="🏀")
