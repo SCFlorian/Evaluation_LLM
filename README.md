@@ -542,5 +542,5 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 #### Affichage si le schéma pydantic n'est pas respecté :
 
 <p align="left">
-  <img src="notebooks/screenshot/erreur_pydantic.png" width="35%" alt="Erreur_pydantic">
+  <img src="notebooks/screenshot/erreur_pydantic.png" width="65%" alt="Erreur_pydantic">
 </p>
