@@ -16,3 +16,4 @@ poetry.lock
 # A ignore pour le moment
 vector_db/
 .logfire
+README copy.md
