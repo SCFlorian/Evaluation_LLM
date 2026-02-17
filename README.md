@@ -586,3 +586,55 @@ Dans notre API qui repose sur `FastAPI` nous avons 4 endpoints :
 <p align="left">
   <img src="notebooks/screenshot/doc_swagger.png" width="55%" alt="doc_swagger">
 </p>
+
+# Intéraction avec le chatbot
+
+Plusieurs options s'offrent à vous pour intéragir avec le chatbot :
+
+## Utilisation de Postman
+
+Pour tester l'API et sauvegarder vos requêtes, vous pouvez utiliser Postman :
+
+1. **Configurez la requête :**
+   - Créez une nouvelle requête.
+   - Choisissez la méthode **POST**.
+   - Entrez l'URL : `http://localhost:7860/ask`
+
+2. **Ajouter le contenu (Body) :**
+   - Allez dans l'onglet **Body**.
+   - Sélectionnez **raw**.
+   - Dans le menu déroulant à droite (souvent sur "Text"), choisissez **JSON**.
+   - Collez votre question au format JSON :
+     ```json
+     {
+       "question": "Qui est le meilleur marqueur de la NBA en ce moment ?"
+     }
+     ```
+
+3. **Lancer :**
+   - Cliquez sur **Send**.
+   - La réponse du chatbot apparaîtra en bas dans la fenêtre de réponse.
+
+*Note : Vous pouvez procéder de la même manière pour l'endpoint `/rebuild_index` ou `/rebuild_SQL_Base` (Méthode POST) afin de mettre à jour les données.*
+
+4. Exemple pour le endpoint `ask`
+
+<p align="left">
+  <img src="notebooks/screenshot/postman_ask.png" width="55%" alt="postman_ask">
+</p>
+
+## Utilisation de Streamlit
+
+Vous avez la possibilité d'utiliser l'interface de Streamlit afin d'avoir une utilisation plus proche de ce que l'utilisateur final aura entre les mains.
+
+Depuis votre terminal (vérifiez bien d'être dans le bon projet) :
+
+```
+streamlit run InterfaceChat.py
+```
+
+Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le chatbot :
+
+<p align="left">
+  <img src="notebooks/screenshot/interfacechat_reponse.png" width="55%" alt="interfacechat_reponse">
+</p>

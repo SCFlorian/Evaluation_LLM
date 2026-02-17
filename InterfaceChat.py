@@ -19,7 +19,7 @@ except Exception:
 st.set_page_config(page_title="Assistant NBA (Groq)", page_icon="🏀")
 
 st.title("🏀 NBA Analyst AI")
-st.caption("Propulsé par Groq (LPU) & HuggingFace - 100% Local & Gratuit")
+st.caption("Propulsé par Groq (LPU) & HuggingFace")
 
 # --- Initialisation de la Session ---
 if "messages" not in st.session_state:
