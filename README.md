@@ -498,21 +498,24 @@ with logfire.span("Router Decision"):
 
 **Utilisation de logfire span** dans le `chat.py` et le `second_evaluation_ragas.py` :
 
-- Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
+#### Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
 
 ![alt text](notebooks/screenshot/logfire_traitement_question.png)
 
 
-- Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
-    - par question :
+#### Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
+
+- par question :
 
 ![alt text](notebooks/screenshot/logfire_questions_ragas.png)
 
-    - au global :
+- au global :
 
-![alt text](notebooks/screenshot/logfire_ragas_total.png)
+<p align="left">
+  <img src="notebooks/screenshot/logfire_ragas_total.png" width="35%" alt="Image_métriques_ragas">
+</p>
 
-#### Visualation avec des dashboard
+### Visualation avec des dashboard
 
 Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
@@ -538,4 +541,6 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
 #### Affichage si le schéma pydantic n'est pas respecté :
 
-![alt text](notebooks/screenshot/erreur_pydantic.png)
+<p align="left">
+  <img src="notebooks/screenshot/erreur_pydantic.png" width="35%" alt="Erreur_pydantic">
+</p>
