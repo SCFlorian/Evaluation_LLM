@@ -94,6 +94,7 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 │   ├──sql_tool.py                             # Préparation de la chaîne pour récupérer les informations depuis la BDD
 ├── notebooks/                                 # Dossier contenant les notebooks pour une meilleure compréhension des données
 │   └── graph/                                 # Dossier contenant les graphiques utilisés pour la documentation
+│   └── screenshot/                            # Dossier contenant les images utilisées pour la documentation
 │   ├──notebook_analyse_excel.ipynb            # Notebook sur la préparation du fichier excel pour les évaluations
 │   ├──notebook_evaluation_ragas.ipynb         # Notebook sur la préparation des résultats des évaluations des métriques ragas
 ├── rag/                                       # Scripts contenant les fonctions du système RAG
