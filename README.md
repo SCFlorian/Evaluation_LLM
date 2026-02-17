@@ -16,6 +16,7 @@
 11. [Validation des données avec Pydantic](#validation-des-données-avec-pydantic)
 12. [API & Documentation Swagger](#api--documentation-swagger)
 13. [Intéraction avec le chatbot](#intéraction-avec-le-chatbot)
+14. [Conclusions & Perspectives](#conclusions-&-perspectives)
 
 ---
 
@@ -523,6 +524,30 @@ Nous voyons clairement une amélioration significative de notre modèle.
     - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
     - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinente à la question.
 
+## Les limites de l'évaluation
+
+### Limites et biais de l'évaluation
+
+Bien que Ragas soit un standard pour évaluer les systèmes RAG, j'ai identifié et pris en compte plusieurs limites et biais inhérents à cette méthode :
+
+### Le biais du "LLM-as-a-Judge" (biais d'auto-évaluation)
+L'évaluation Ragas repose sur un LLM externe (ici via Groq) pour noter les réponses. Ce paradigme présente des biais connus :
+* **Biais de verbosité :** Les LLMs ont tendance à attribuer de meilleurs scores aux réponses longues et détaillées, même si une réponse courte était tout aussi correcte.
+* **Sensibilité au formatage :** Le LLM Juge peut être influencé par une belle mise en forme (listes à puces, ton assuré) et rater une erreur factuelle subtile.
+
+### 2. La barrière linguistique (biais de traduction interne)
+La majorité des LLMs et des modèles d'embedding (comme `all-MiniLM-L6-v2` utilisé ici) sont optimisés pour l'anglais. 
+* L'évaluation de concepts complexes ou de nuances en **français** peut parfois être légèrement biaisée ou mal comprise par le modèle Juge lors du calcul de la pertinence (*Answer Relevancy*) ou de la précision du contexte.
+
+### 3. La dépendance au "Ground Truth" (vérité terrain)
+Les métriques comme le *Context Recall* dépendent entièrement de la qualité de mon dataset de test (`ground_truths`). 
+* **Limite :** Si ma réponse de référence ("Ground Truth") est incomplète ou mal formulée, Ragas pénalisera le système RAG, même si ce dernier a fourni une réponse exacte et documentée. L'évaluation est donc plafonnée par la qualité de mon jeu de test.
+
+### 4. L'opacité stochastique (Faux positifs)
+Un score de "1.0" en *Faithfulness* (Fidélité) ne garantit pas à 100% l'absence d'hallucination. Le modèle Juge peut lui-même halluciner pendant son processus d'évaluation.
+
+---
+
 # Suivre les performances
 
 Nous avons décidé d'inclure Pydantic Logfire. Logfire est une plateforme qui permet de :
@@ -742,3 +767,30 @@ Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le c
   <img src="notebooks/screenshot/interfacechat_reponse.png" width="65%" alt="interfacechat_reponse">
 </p>
 
+# Conclusions & Perspectives
+
+## Conclusions
+
+- À travers les résultats de l'évaluation RAGAS, on peut soulever que le nouveau système RAG est plus pertinent et robuste que le prototype. 
+
+- Le chatbot est en capacité de pouvoir répondre à des questions provenant :
+  - d'une base SQL
+  - d'une base vectorielle
+  - des deux à la fois
+
+- Nous avons une traçabilité de nos échanges avec le chatbot depuis Pydantic Logfire et nous pouvons monitorer plusieurs éléments importants comme :
+  - le temps de traitement d'une question
+  - la méthode employée par le système RAG
+  - le nombre de tokens utilisé
+  - capacité de pouvoir stocker nos métriques d'évaluations
+  - voir le contexte utilisé par le chatbot
+
+- Nous avons plusieurs méthodes pour intéragir avec le chatbot de SportSee 
+
+## Perpsectives
+
+- Ajouter des questions encore plus compliquées et bruitées pour voir comment il réagit et stocker les résultats sous Logfire
+- Obtenir plus de données, par exemple avoir un détail des résultats des matchs
+- Ajouter des fichiers PDF, textes afin de proposer des questions plus précises
+- La gestion actuelle des PDF n'est pas optimale, les fichiers ne sont pas nettoyés et pré-traités
+  - Cela pourrait permettre une meilleure récupération des informations de Reddit.
