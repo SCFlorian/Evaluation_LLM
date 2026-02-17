@@ -11,7 +11,7 @@ import logfire
 # CONFIGURATION LOGFIRE
 # ======================
 # Cela configure tout automatiquement
-logfire.configure()
+logfire.configure(service_name="SportSee_ChatBot")
 logfire.instrument_pydantic()
 logfire.instrument_system_metrics()
 
@@ -74,7 +74,7 @@ class ChatPipeline:
         with logfire.span("1. Validation Entrée (Pydantic)"):
             try:
                 InputData(question=question)
-            except ValidationError:
+            except ValidationError as e:
                 logfire.error("Validation Pydantic Échouée", error=str(e))
                 # Si invalide, on renvoie une réponse d'erreur tout de suite
                 return {
@@ -128,22 +128,22 @@ class ChatPipeline:
             # ============
             if route in ["VECTOR", "BOTH"]:
                 # 1. On récupère la liste des documents
-                with logfire.span("Vector Retrieval"):
+                with logfire.span("2. Vector Retrieval"):
                     docs = self.retriever.retrieve(question)
                 
-                # 2. On prépare le texte pour le LLM
-                doc_raw = "\n\n".join([d.page_content for d in docs])
-                
-                # 3. On boucle sur la liste pour remplir les sources
-                for d in docs:
-                    sources_finales.append({
-                        "type": "pdf", 
-                        "content": d.page_content, 
-                        "metadata": d.metadata
-                    })
+                    # 2. On prépare le texte pour le LLM
+                    doc_raw = "\n\n".join([d.page_content for d in docs])
+                    
+                    # 3. On boucle sur la liste pour remplir les sources
+                    for d in docs:
+                        sources_finales.append({
+                            "type": "pdf", 
+                            "content": d.page_content, 
+                            "metadata": d.metadata
+                        })
 
-                doc_section = f"INFORMATIONS DOCUMENTAIRES (CONTEXTE) :\n{doc_raw}"
-            # =================
+                    doc_section = f"INFORMATIONS DOCUMENTAIRES (CONTEXTE) :\n{doc_raw}"
+                # =================
             # ASSEMBLAGE FINAL
             # =================
             if route == "SQL":

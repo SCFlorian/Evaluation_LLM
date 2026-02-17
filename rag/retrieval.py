@@ -4,6 +4,7 @@
 # =======================
 import logging
 import time
+import logfire
 # Imports LangChain
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -42,7 +43,8 @@ class RetrievalService:
         except Exception as e:
             logging.error(f"Erreur fatale lors du chargement de l'index : {e}")
             self.vector_store = None
-
+    # Import de logfire
+    @logfire.instrument("Recherche Vectorielle interne: {question}")
     def retrieve(self, query: str, k: int = SEARCH_K):
         """Recherche les documents les plus proches."""
         if not self.vector_store:

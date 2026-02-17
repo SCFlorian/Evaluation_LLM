@@ -430,7 +430,7 @@ On apercoit une certaine logique avec :
 
 On note facilement pour les perspectives que nous devons encore amélioré notre système pour sécuriser les questions bruitées.
 
-## Comparaison entre les 2 systèmes avec les métriques ragas
+# Comparaison entre les 2 systèmes avec les métriques ragas
 
 Prenons la moyenne des 20 questions :
 
@@ -446,7 +446,7 @@ Nous voyons clairement une amélioration significatve de notre modèle.
     - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
     - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinent à la question.
 
-## Suivre les performances
+# Suivre les performances
 
 Nous avons décidé d'inclure Pydantic Logfire. Logfire est une plateforme qui permet de :
 - collecter les logs (messages générés par un programme),
@@ -456,7 +456,7 @@ Nous avons décidé d'inclure Pydantic Logfire. Logfire est une plateforme qui p
 
 Logfire est un outil pour surveiller, comprendre et déboguer une application grâce aux logs.
 
-#### **Mise en place dans notre système RAG** 
+### **Mise en place dans notre système RAG** 
 
 Afin de pouvoir visualiser pas à pas le fonctionnement de la chaîne RAG/LLM lors de son exécution. Il va nous permettre également d'avoir des dashboard pour s'assurer des bonnes performances de notre modèle.
 
@@ -498,12 +498,18 @@ with logfire.span("Router Decision"):
 
 **Utilisation de logfire span** dans le `chat.py` et le `second_evaluation_ragas.py` :
 
-#### Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
+### Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
 
 ![alt text](notebooks/screenshot/logfire_traitement_question.png)
 
+- Nous pouvons suivre en détail ce qu'il s'est passé et le pipeline passe par la validation Pydantic. 
+- Il est possible de voir par exemple le détail de la réponse, quel contexte a été sélectionné :
 
-#### Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
+<p align="left">
+  <img src="notebooks/screenshot/output_context.png" width="35%" alt="output_context">
+</p>
+
+### Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
 
 - par question :
 
@@ -527,7 +533,7 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
 ![alt text](notebooks/screenshot/erreurs_dashboard.png)
 
-#### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les mettre en dashboard
+### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les mettre en dashboard
 
 - Nombre de tokens utilisés :
 
@@ -539,7 +545,7 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
   <img src="notebooks/screenshot/temps_dashboard.png" width="35%" alt="Dashboard des temps de réponse">
 </p>
 
-#### Affichage si le schéma pydantic n'est pas respecté :
+### Affichage si le schéma pydantic n'est pas respecté :
 
 <p align="left">
   <img src="notebooks/screenshot/erreur_pydantic.png" width="125%" alt="Erreur_pydantic">
