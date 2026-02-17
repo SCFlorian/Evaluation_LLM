@@ -14,7 +14,7 @@
 9. [Comparaison entre les 2 systèmes avec les métriques ragas](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
 10. [Suivre les performances](#suivre-les-performances)
 11. [API & Documentation Swagger](#api--documentation-swagger)
-11. [Intéraction avec le chatbot](#intréraction-avec-le-chatbot)
+11. [Intéraction avec le chatbot](#intéraction-avec-le-chatbot)
 
 ---
 
@@ -621,7 +621,7 @@ Pour tester l'API et sauvegarder vos requêtes, vous pouvez utiliser Postman :
 4. Exemple pour le endpoint `ask`
 
 <p align="left">
-  <img src="notebooks/screenshot/postman_ask.png" width="65%" alt="postman_ask">
+  <img src="notebooks/screenshot/postman_ask.png" width="75%" alt="postman_ask">
 </p>
 
 ## Utilisation de Streamlit
