@@ -1,35 +1,28 @@
-# 1) Assistant RAG avec Llama
+# Assistant RAG avec Llama
+
+
+# Sommaire
+
+1. [Fonctionnalités](#fonctionnalités)
+2. [Prérequis](#prérequis)
+3. [Installation](#installation)
+4. [Structure du projet](#structure-du-projet)
+5. [Résultats de l'évaluation sur l'ensemble des questions](#résultats-de-lévaluation-sur-lensemble-des-questions)
+6. [Résultats de l'évaluation par type de question](#résultats-de-lévaluation-par-type-de-question)
+7. [Conclusion de cette première évaluation ragas](#conclusion-de-cette-première-évaluation-ragas)
+8. [Mise en place de la nouvelle structure](#mise-en-place-de-la-nouvelle-structure)
+9. [Comparaison entre les 2 systèmes avec les métriques ragas](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
+10. [Suivre les performances](#suivre-les-performances)
+11. [API & Documentation Swagger](#api--documentation-swagger)
+
+---
 
 Ce projet implémente un assistant virtuel basé sur un modèle Llama, utilisant la technique de Retrieval-Augmented Generation (RAG) pour fournir des réponses précises et contextuelles à partir d'une base de connaissances personnalisée.
 L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à des améliorations afin d'obtenir des meilleurs résultats.
 Les améliorations seront visibles avec une comparaison des métriques ragas sur le prototype vs la nouvelle structure du projet.
 
-## 1.1) Sommaire
 
-- [Résultats de l'évaluation ragas](#résultats-de-lévaluation-sur-lensemble-des-questions)
-- [Résultats par type de question](#résultats-de-lévaluation-par-type-de-question)
-- [Conclusion de la première évaluation ragas](#conclusion-de-cette-première-évaluation-ragas)
-
-- [Mise en place de la nouvelle structure](#mise-en-place-de-la-nouvelle-structure)
-  - [Technologies utilisées](#1-technologies-utilisées)
-  - [Définition du nouvel objectif](#2-définition-de-notre-nouveau-objectif)
-  - [Nouvelle organisation du projet](#3-nouvelle-organisation-du-projet)
-  - [Mise en place de la base de données](#4-mise-en-place-de-la-base-de-données)
-  - [Mise en place du routeur](#5-mise-en-place-dun-routeur-pour-sélectionner-les-bonnes-données)
-  - [Évaluation du nouveau système](#6-évaluation-de-notre-nouveau-système)
-  - [Résultats de la seconde évaluation](#7-résultats-de-la-seconde-évaluation-ragas)
-
-- [Comparaison entre les deux systèmes](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
-
-- [Suivi des performances](#suivre-les-performances)
-  - [Mise en place dans le système RAG](#mise-en-place-dans-notre-système-rag)
-  - [Visualisation avec Logfire](#visualation-avec-des-dashboard)
-
-- [API & Documentation Swagger](#api--documentation-swagger)
-  - [Endpoints](#api--documentation-swagger)
-  - [Documentation Swagger](#documentation-swagger)
-
-## 1.2) Fonctionnalités
+## Fonctionnalités
 
 - 🗄️ **Création des vecteurs** avec HuggingFaceEmbeddings.
 - 🗄️ **Recherche sémantique** avec FAISS pour trouver les documents pertinents (PDF à disposition).
@@ -38,13 +31,13 @@ Les améliorations seront visibles avec une comparaison des métriques ragas sur
 - 🤖 **Génération de réponses** avec un modèle Llama (llama-3.3-70b-versatile) via Groq.
 - ⚙️ **Paramètres personnalisables** (modèle, nombre de documents, score minimum, etc).
 
-## 1.3) Prérequis
+## Prérequis
 
 - Python 3.9+ 
 - Clé API Groq (avoir un compte et se diriger vers : https://console.groq.com/keys)
 - Avoir une solution de stockage en local (PostreSQL utilisé ici)
 
-## 1.4) Installation
+## Installation
 
 1. **Cloner le dépôt**
 
@@ -76,7 +69,7 @@ GROQ_API_KEY=votre_clé_api_groq
 DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 ```
 
-## 1.5) Structure du projet
+## Structure du projet
 
 ```
 .
@@ -133,11 +126,11 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 ├── pyproject.toml                             # Gestion des dépendances Poetry
 ├── README.md                                  # Documentation du projet
 ```
-## 1.6) Utilisation rapide
+## Utilisation rapide
 Proposition ici d'une installation rapide pour visionner l'API Rest et l'interface Streamlit.
 Nous avons effectué beaucoup de changements entre le prototype et la nouvelle version alors dans le rapport technique nous irons en détail dans le fonctionnement et les explications de ce que nous utilisons dans cette nouvelle proposition du chatbot.
 
-### 1.6.1) 1. Ajouter des documents
+### 1. Ajouter des documents
 
 Placez vos documents dans le dossier `data/raw`.
 Deux formats sont suportés pour le projet, il est possible de placer des documents en PDF ainsi que des fichiers excel.
@@ -145,8 +138,8 @@ Deux formats sont suportés pour le projet, il est possible de placer des docume
 - Les fichiers excel seront nettoyés et ajoutés dans une base de données relationnelle (PostreSQL utilisé ici).
 - Pour maintenir une cohérence et une fiabilité dans nos données, les fichiers excel doivent respecter un certain format (vous pouvez par exemple celui utilisé  dans data/raw).
 
-### 1.6.2) 2. Génération des documents et de la base de données
-#### 1.6.2.1) Pour la création des vecteurs des documents en PDF
+### 2. Génération des documents et de la base de données
+#### Pour la création des vecteurs des documents en PDF
 - Dans un premier temps assurez-vous d'avoir un dossier `vector_db/` dans le repo.
 - Deux solutions s'offrent à vous :
 
@@ -163,7 +156,7 @@ http://localhost:7860/docs
 Ici vous pouvez générer la base d'index via le bouton `rebuild_index`.
 Cela va permettre également la génération des vecteurs dans le dossier `vector_db/`
 
-#### 1.6.2.2) Pour la création de la base de données
+#### Pour la création de la base de données
 L'enregistrement des datas dans la base données se fait dans une base PostreSQL en local.
 1. Connexion à une base PostreSQL
 Choix de la BDD PostreSQL pour sa simplicité avec l'ORM SQLAlchemy.
@@ -189,12 +182,12 @@ Depuis la documentation Swagger vous pouvez générer la base de données via le
 - Les tables sont désormais à jour. Si vous avez installé pgAdmin, vous pouvez visualiser facilement l'intégration des données.
 
 
-# 2) Rapport technique - du prototype au système actuel
-## 2.1) Reprise d'un prototype existant
+# Rapport technique - du prototype au système actuel
+## Reprise d'un prototype existant
 
 Pour mener à bien cette mission, nous avons eu à disposition un prototype du chatbot. Dans un premier temps l'objectif a été de comprendre ce qui a été fait, quelle structure nous avons et nous sommes passé ensuite à une évaluation du système actuel via une évaluation des métriques Ragas.
 
-### 2.1.1) Audit du prototype
+### Audit du prototype
 1. **Organisation du projet**
 
 La structure de l'ancien fichier était la suivante :
@@ -271,7 +264,7 @@ Ce qu'il se passe :
 - génération de 4 colonnes supplémentaires (les 4 métriques) dans le csv 
 - Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
 
-#### 2.1.1.1) **Résultats de l'évaluation sur l'ensemble des questions**
+#### **Résultats de l'évaluation sur l'ensemble des questions**
 
 - Nous récupérons notre csv et nous avons décortiqué les résultats dans un notebook dédié.
 - Nous avons déjà regardé les scores moyens au global sur les 15 questions :
@@ -295,7 +288,7 @@ Ce qu'il se passe :
 - la precision basse, le retriever ramène du bruit.
 - le recall bas, il manque des infos clés.
 
-#### 2.1.1.2) **Résultats de l'évaluation par type de question**
+#### **Résultats de l'évaluation par type de question**
 - Regardons les résultats par type de question :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question.png)
@@ -311,7 +304,7 @@ Les scores démontrent un manque d'efficacité à récupérer les documents util
 Nous avons alors regardé comment les documents sont générés et nous avons identifié ce qui pourrait être le problème. 
 **Actuellement le modèle prend en compte le fichier excel comme un fichier texte.** En l'état, le modèle prend en compte les données en texte et va les découper, il va alors se "perdre" lors du retrieval et ne va pas être capable de porposer des calculs si par exemple on lui demande de calculer le nombre de points d'une équipe en particulier.
 
-## 2.2) Mise en place de la nouvelle structure
+## Mise en place de la nouvelle structure
 
 L'idée n'a pas été de repartir totalement d'une page blanche. Il y a désormais une nouvelle structure avec des fonctions bien séparées et plus modulables.
 
@@ -438,13 +431,13 @@ python -m scripts.evaluation.new_system.second_ragas_eveluation
 
 7. **Résultats de la seconde évaluation ragas**
 
-#### 2.2.1) Moyenne global des métriques
+#### Moyenne global des métriques
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_seconde_eval.png)
 
 - Sur l'ensemble des 4 métriques, nous avons des résultats solides qui démontrent des réponses cohérentes et documentés sur les 20 questions que nous avons posé.
 
-#### 2.2.2) Moyenne par type de question
+#### Moyenne par type de question
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question_seconde_eval.png)
 
@@ -455,7 +448,7 @@ On apercoit une certaine logique avec :
 
 On note facilement pour les perspectives que nous devons encore amélioré notre système pour sécuriser les questions bruitées.
 
-# 3) Comparaison entre les 2 systèmes avec les métriques ragas
+# Comparaison entre les 2 systèmes avec les métriques ragas
 
 Prenons la moyenne des 20 questions :
 
@@ -471,7 +464,7 @@ Nous voyons clairement une amélioration significatve de notre modèle.
     - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
     - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinent à la question.
 
-# 4) Suivre les performances
+# Suivre les performances
 
 Nous avons décidé d'inclure Pydantic Logfire. Logfire est une plateforme qui permet de :
 - collecter les logs (messages générés par un programme),
@@ -481,7 +474,7 @@ Nous avons décidé d'inclure Pydantic Logfire. Logfire est une plateforme qui p
 
 Logfire est un outil pour surveiller, comprendre et déboguer une application grâce aux logs.
 
-### 4.1) **Mise en place dans notre système RAG**
+### **Mise en place dans notre système RAG** 
 
 Afin de pouvoir visualiser pas à pas le fonctionnement de la chaîne RAG/LLM lors de son exécution. Il va nous permettre également d'avoir des dashboard pour s'assurer des bonnes performances de notre modèle.
 
@@ -495,35 +488,35 @@ Il faut également l'initier, lors de votre premier lancement sur un projet, il 
 Nous avons utiliser les commandes principales de Logfire pour tracker notre projet :
 
 ```
-# 5) Configure Logfire avec les paramètres par défaut.
-# 6) Cette instruction initialise la connexion à la plateforme Logfire et permet
-# 7) de commencer la collecte et l’envoi des logs générés par l’application.
+# Configure Logfire avec les paramètres par défaut.
+# Cette instruction initialise la connexion à la plateforme Logfire et permet
+# de commencer la collecte et l’envoi des logs générés par l’application.
 logfire.configure()
 
-# 8) Active l’instrumentation automatique de Pydantic.
-# 9) Cette fonctionnalité permet d’enregistrer les opérations liées à la validation
-# 10) des données, notamment les succès et les erreurs de validation des modèles.
-# 11) Cela facilite le débogage et le suivi des flux de données dans l’application.
+# Active l’instrumentation automatique de Pydantic.
+# Cette fonctionnalité permet d’enregistrer les opérations liées à la validation
+# des données, notamment les succès et les erreurs de validation des modèles.
+# Cela facilite le débogage et le suivi des flux de données dans l’application.
 logfire.instrument_pydantic()
 
-# 12) Active la collecte des métriques système.
-# 13) Cette instruction permet de surveiller les ressources système telles que
-# 14) l’utilisation du CPU, de la mémoire et d’autres indicateurs de performance.
-# 15) Ces informations sont utiles pour analyser les performances et détecter
-# 16) d’éventuels problèmes liés à l’exécution de l’application.
+# Active la collecte des métriques système.
+# Cette instruction permet de surveiller les ressources système telles que
+# l’utilisation du CPU, de la mémoire et d’autres indicateurs de performance.
+# Ces informations sont utiles pour analyser les performances et détecter
+# d’éventuels problèmes liés à l’exécution de l’application.
 logfire.instrument_system_metrics()
 
-# 17) Crée un span Logfire pour tracer l’exécution d’un bloc de code.
-# 18) Un span représente une unité de travail ou une opération spécifique
-# 19) dans l’application, par exemple une requête, un calcul ou un appel de fonction.
-# 20) Il permet de mesurer la durée d’exécution et d’enregistrer des informations
-# 21) associées à cette opération pour faciliter l’analyse et le débogage.
+# Crée un span Logfire pour tracer l’exécution d’un bloc de code.
+# Un span représente une unité de travail ou une opération spécifique
+# dans l’application, par exemple une requête, un calcul ou un appel de fonction.
+# Il permet de mesurer la durée d’exécution et d’enregistrer des informations
+# associées à cette opération pour faciliter l’analyse et le débogage.
 with logfire.span("Router Decision"):
 ```
 
 **Utilisation de logfire span** dans le `chat.py` et le `second_evaluation_ragas.py` :
 
-### 21.1) Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
+### Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
 
 ![alt text](notebooks/screenshot/logfire_traitement_question.png)
 
@@ -534,7 +527,7 @@ with logfire.span("Router Decision"):
   <img src="notebooks/screenshot/output_context.png" width="55%" alt="output_context">
 </p>
 
-### 21.2) Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
+### Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
 
 - par question :
 
@@ -546,7 +539,7 @@ with logfire.span("Router Decision"):
   <img src="notebooks/screenshot/logfire_ragas_total.png" width="35%" alt="Image_métriques_ragas">
 </p>
 
-### 21.3) Visualation avec des dashboard
+### Visualation avec des dashboard
 
 Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
@@ -558,7 +551,7 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
 ![alt text](notebooks/screenshot/erreurs_dashboard.png)
 
-### 21.4) Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les mettre en dashboard
+### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les mettre en dashboard
 
 - Nombre de tokens utilisés :
 
@@ -570,13 +563,13 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
   <img src="notebooks/screenshot/temps_dashboard.png" width="35%" alt="Dashboard des temps de réponse">
 </p>
 
-### 21.5) Affichage si le schéma pydantic n'est pas respecté :
+### Affichage si le schéma pydantic n'est pas respecté :
 
 <p align="left">
   <img src="notebooks/screenshot/erreur_pydantic.png" width="155%" alt="Erreur_pydantic">
 </p>
 
-# 22) API & Documentation Swagger
+# API & Documentation Swagger
 
 Swagger est un outil qui permet de documenter, décrire et tester une API REST de manière claire et interactive.
 Plus précisément, la documentation Swagger est une description structurée d’une API qui montre tous les endpoints disponibles, leurs paramètres, les requêtes possibles et les réponses retournées.
@@ -588,7 +581,7 @@ Dans notre API qui repose sur `FastAPI` nous avons 4 endpoints :
 - `@app.post("/rebuild_index")` : va permettre la construction ou re-construction de la base vectorielle
 - `@app.post('/rebuild_SQL_Base')` : va permettre la construction ou re-construction de la base de données
 
-#### 22.1) Documentation Swagger :
+#### Documentation Swagger :
 
 <p align="left">
   <img src="notebooks/screenshot/doc_swagger.png" width="55%" alt="doc_swagger">
