@@ -10,7 +10,7 @@ python = ">=3.13,<3.15"
 # --- Le Coeur ---
 langchain = "1.2.10"
 langchain-community = "0.4.1"
-langchain-core = "1.2.10"
+langchain-core = "^1.2.11"
 
 # --- Les Nouveaux Moteurs (Gratuits) ---
 langchain-groq = "1.1.2"
