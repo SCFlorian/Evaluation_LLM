@@ -13,8 +13,9 @@
 8. [Mise en place de la nouvelle structure](#mise-en-place-de-la-nouvelle-structure)
 9. [Comparaison entre les 2 systèmes avec les métriques ragas](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
 10. [Suivre les performances](#suivre-les-performances)
-11. [API & Documentation Swagger](#api--documentation-swagger)
-11. [Intéraction avec le chatbot](#intéraction-avec-le-chatbot)
+11. [Validation des données avec Pydantic](#validation-des-données-avec-pydantic)
+12. [API & Documentation Swagger](#api--documentation-swagger)
+13. [Intéraction avec le chatbot](#intéraction-avec-le-chatbot)
 
 ---
 
@@ -129,7 +130,7 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 ```
 ## Utilisation rapide
 Proposition ici d'une installation rapide pour visionner l'API Rest et l'interface Streamlit.
-Nous avons effectué beaucoup de changements entre le prototype et la nouvelle version alors dans le rapport technique nous irons en détail dans le fonctionnement et les explications de ce que nous utilisons dans cette nouvelle proposition du chatbot.
+Nous avons effectué beaucoup de changements entre le prototype et la nouvelle version. Ainsi dans le rapport technique nous irons en détail dans le fonctionnement et les explications de ce que nous utilisons dans cette nouvelle proposition du chatbot.
 
 ### 1. Ajouter des documents
 
@@ -182,7 +183,7 @@ Lancement de ce script va importer vos données excel dans votre base.
 Depuis la documentation Swagger vous pouvez générer la base de données via le bouton `rebuild_SQL_Base`.
 - Les tables sont désormais à jour. Si vous avez installé pgAdmin, vous pouvez visualiser facilement l'intégration des données.
 
-#### Pour lancer le projet, vous avez plusieurs options :
+### 3. Pour lancer le projet, vous avez plusieurs options :
 
 - La méthode privilégiée pour exécuter l'interface est **Docker**, garantissant un environnement isolé et stable.
 1. Prérequis
@@ -202,9 +203,13 @@ docker run -d \
   --env-file .env \
   sportsee-streamlit
 ```
+- On peut également générer le projet via la documentation swagger de FastAPI : 
 
-On peut également générer le projet via la documentation swagger de FastAPI : détails dans [API & Documentation Swagger](#api--documentation-swagger)
+Une fois votre fichier app lancé, vous pouvez rejoindre la documentation intéractive et tester les endpoints :
 
+```
+http://localhost:7860/docs
+```
 
 # Rapport technique - du prototype au système actuel
 ## Reprise d'un prototype existant
@@ -262,9 +267,9 @@ L'objectif est d'évaluer le modèle avec ragas, pour cela il faut avoir un jeu 
 Création du fichier **generation_answers.py** dans un nouveau dossier scripts/evaluation (vous le trouverez dans le dossier prototype)
 
 On y retouve 20 questions et 20 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
-- Questions faciles (valeurs directes)
-- Questions intermédiaires (comparaison simple)
-- Questions plus difficiles (questions bruitées)
+- **Questions faciles (valeurs directes)**
+- **Questions compliquées (comparaisons)**
+- **Questions plus difficiles (questions bruitées)**
 - Vu la demande de l'entreprise, on a réalisé plus de question sur la partie statistique :
     - 14 questions sur le fichier excel
     - 3 questions sur les fichiers reddit
@@ -275,7 +280,9 @@ On y retouve 20 questions et 20 réponses (humaines) portant sur le fichier exce
 Dans le fichier csv généré (dans le dossier resultat_evaluation.csv) nous retrouvons en plus des questions/réponses (humaines + chatbot) :
 - la liste des contextes utilisés par le chatbot pour fournir une réponse (obligatoire pour ragas)
 - le numéro des documents sélectionnés
-- **Lancement de l'évaluation ragas**
+
+**Lancement de l'évaluation ragas**
+
 Nous chargeons les métriques que nous voulons utiliser pour évaluer le modèle (dans le fichier : first_ragas_evaluation.py) :
 - **faithfulness** Génération: fidèle au contexte ?
 - **answer_relevancy** Génération: réponse pertinente à la question ?
@@ -283,19 +290,20 @@ Nous chargeons les métriques que nous voulons utiliser pour évaluer le modèle
 - **context_recall** Récupération: infos clés récupérées ?
 
 Nous n'avons pas modifié le modèle afin d'évaluer le prototype tel quel, nous avons juste ajouté une instruction au prompt pour demander au LLM de faire des réponses courtes afin d'ajouter une certaine cohérence avec les réponses que nous avons généré de notre côté. Ensuite nous avons lancé l'évaluation.
-Ce qu'il se passe :
+
+Ce qu'il se passe lors de son exécution :
 - chaque question est analysée
 - génération de 4 colonnes supplémentaires (les 4 métriques) dans le csv 
 - Les scores sont entre 0 et 1, ce sont des scores normalisés, le 1 indique alors le meilleur score possible.
 
-#### **Résultats de l'évaluation sur l'ensemble des questions**
+### **Résultats de l'évaluation sur l'ensemble des questions**
 
 - Nous récupérons notre csv et nous avons décortiqué les résultats dans un notebook dédié.
-- Nous avons déjà regardé les scores moyens au global sur les 15 questions :
+- Nous avons déjà regardé les scores moyens au global sur les 20 questions :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas.png)
 
-- Sur ce graphique nous avons déjà de la matière pour une interprétation :
+Sur ce graphique nous avons déjà de la matière pour une interprétation :
 
 - On voit un score de "answer relevancy", pertinence de la réponse, élevé en moyenne avec 0.92. Pour rappel lors du calcul de cette métrique, le LLM va générer des questions implicites à partir de la réponse, il va comparer les questions avec la question originale et le score est basé sur la similarité sémantique.
     - Cela signifie que les réponses sont bien alignées sémantiquement avec la question. Par contre une réponse peut être pertinente mais fausse.
@@ -306,22 +314,25 @@ Ce qu'il se passe :
 - Le score de "context_recall", avons-nous récupéré toutes les infos nécessaires, est bas avec 0.33 en moyenne. Ici le LLM va identifier les informations clés requises pour répondre à la question. Ensuite il va vérifier si elles apparaissent dans le context.
     - 0.33 signifie qu'on ne récupère pas les bons documents ou on ne récupère qu’une petite partie des informations nécessaires.
 
-- En conlusion de la moyenne globale :
+En conlusion de la moyenne globale :
+
 - la relevancy élevée montre que le LLM comprend bien la question.
 - la faithfulness très basse, il invente ou extrapole.
 - la precision basse, le retriever ramène du bruit.
 - le recall bas, il manque des infos clés.
 
-#### **Résultats de l'évaluation par type de question**
-- Regardons les résultats par type de question :
+### **Résultats de l'évaluation par type de question**
+
+Regardons les résultats par type de question :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_par_question.png)
 
 On voit avec ce graphique que les scores globaux sont tirés vers le haut par les questions simples :
-- Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort légèrement mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bein supéreiurs sur ce type de question.
-- Sur les questions compliquées et bruitées, c'est à dire des questions un peu plus longues, et des questions volontairement moins explicites, les scores se dégradent. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
+- Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort légèrement mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bien supérieurs sur ce type de question.
+- Sur les questions compliquées et bruitées, c'est à dire des questions un peu plus longues et des questions volontairements moins explicites, les scores se dégradent. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
 
 - **Conclusion de cette première évaluation ragas**
+
 En regardant uniquement les réponses de l'interface du chatbot, il arrive à répondre à toutes les questions mais en analysant les réponses attendues et celles du chatbot ainsi que les résultats des métriques, on identifie très vite les limites du modèle actuel.
 Les scores démontrent un manque d'efficacité à récupérer les documents utiles pour apporter une réponse cohérente et factuelle et va s'appuyer sur une recherche internet que par notre système RAG.
 
@@ -333,33 +344,54 @@ Nous avons alors regardé comment les documents sont générés et nous avons id
 L'idée n'a pas été de repartir totalement d'une page blanche. Il y a désormais une nouvelle structure avec des fonctions bien séparées et plus modulables.
 
 1. **Technologies utilisées**
+
 - Language : Python
 - Interface : Streamlit
 - LLM : utilisation de Groq et choix du modèle llama-3.3-70b-versatile
-    - Groq va nous permettre de pouvoir utilsier d'autres modèles si besoin et surtout permet une meilleure visibilité sur les coûts générés
+    - Groq va nous permettre de pouvoir utiliser d'autres modèles si besoin et surtout permettre une meilleure visibilité sur les coûts générés
 - Embeddings : utilisation de HuggingFaceEmbeddings pour la création des vecteurs et choix de l'index FLatL2 de FAISS pour la base vectorielle
 - Orchestration : Langchain
 - Gestion des dépendances : environnement poetry
 
 2. **Définition de notre nouveau objectif**
+
 Dans un premier temps nous avons amélioré la structure de notre projet. Ensuite nous avons ajouté des améliorations comme la mise en place d'une base de données et une méthode supplémentaire de récupération des données. Nous verrons également comment nous suivons les résultats et les performances du système.
 
-3. **Nouvelle organisation du projet**
+3. **Choix des nouveaux modèles**
+
+Nous avons le choix de changer de modèle LLM & d'embeddings pour plusieurs raisons. Pour tester le prototype nous avons donc gardé exactement les mêmes modèles :
+- Mistral small pour le LLM
+- Mistral embed pour la création des vecteurs 
+
+Lors de la mise en place de la nouvelle structure nous avons vite atteint la limite des tokens autorisés dans un plan gratuit. On a alors profité de cette limitation pour changer d'envrionnement et de choisir de passer Groq pour le choix du LLM et passer sur HuggingFaceEmbeddings pour la création des vecteurs.
+
+- Groq est une plateforme qui fournit une infrastructure ultra-rapide pour exécuter des modèles d’intelligence artificielle (LLM). Elle propose une API compatible permettant d’utiliser différents modèles de langage via une seule interface.
+Groq utilise un matériel spécialisé appelé LPU (Language Processing Unit), conçu pour accélérer l’inférence des modèles IA, ce qui permet d’obtenir des réponses très rapides.
+
+On a essayé plusieurs modèles (visible dan sun dashboard dans l'interface de Logfire) avant de choisir celui qui nous convenait le mieux : `llama-3.3-70b-versatile`
+
+- HuggingFaceEmbeddings est un composant qui permet de convertir du texte en vecteurs numériques (embeddings) en utilisant des modèles disponibles sur la plateforme Hugging Face. Choix du `sentence-transformers/all-MiniLM-L6-v2`.
+
+
+4. **Nouvelle organisation du projet**
 
 Désormais nous avons une organisation plus fluide, nous avons mis en place par exemple :
 - un environnement géré par poetry
 - un dossier rag qui va être le coeur du projet avec tous les scripts nécessaires pour faire tourner le système RAG
-- un dossier database qui va permttre la création de notre base de données
+- un dossier database qui va permettre la création de notre base de données
 - un dossier `scripts` avec 3 scripts principaux qui vont regrouper les fonctions principales :
     - build_index qui va construire ou reconstruire la base vectorielle
     - chat qui permet de générer la réponse du chatbot
     - generation_db qui va permettre de créer ou mettre à jour la base de données SQL
 - Mise en place d'un fichier app pour la mise en place de notre API Rest qui est en plus de l'interface Streamlit.
+- Mise en place d'un Dockerfile pour la génération de l'interface Streamlit.
 
-4. **Mise en place de la base de données**
+5. **Mise en place de la base de données**
 
-Nous avons détaillé l'installation de la base de données un peu plus haut. Nous avons fait le choix d'utiliser une base en local pour le moement avec PostreSQL. 
+Nous avons détaillé l'installation de la base de données un peu plus haut. Nous avons fait le choix d'utiliser une base en local pour le moment avec PostreSQL.
+
 Après avoir initialisée et générée la base de données comme indiqué en introduction, nous avons une BDD sur laquelle s'appuyer.
+
 Dans le pipeline de la BDD, avant d'être intégrées, les données du fichier excel sont préalablement nettoyées automatiquement avec le script `preprocessing_excel.py`.
 
 Nous avons désormais 2 tables sur lesquelles notre système RAG va pouvoir prendre de l'information.
@@ -374,13 +406,15 @@ Nous avons désormais 2 tables sur lesquelles notre système RAG va pouvoir pren
 
 - Dans la table `stats`, nous voyons que les catégories sont des acronymes alors nous retrouverons la définition de ces derniers dans les métadonnées pour aider le modèle à ne pas se tromper lorsqu'il sélectionnera une colonne en particulier.
 
-5. **Mise en place d'un routeur pour sélectionner les bonnes données**
+6. **Mise en place d'un routeur pour sélectionner les bonnes données**
 
 Maintenant nous avons 2 sources de données, une provenant d'une base vectorielle et une autre d'une base de données.
 
 L'approche n'est plus la même que dans le prototype, il faut mettre en place un **agent** qui va prendre la décision si la question répond à un besoin pour une requête SQL, une récupération dans les vecteurs ou dans les 2 bases.
 
 C'est le script `routeur` qui va prendre cette décision via un prompt strcturé dans une chaîne LCEL.
+LCEL signifie LangChain Expression Language. C’est un langage utilisé dans la bibliothèque LangChain pour créer et connecter des composants d’intelligence artificielle (LLM) de manière simple et lisible.
+
 Voici le prompt utilisé pour la génération du choix :
 ```
  template = """
@@ -437,7 +471,7 @@ Exemple pour la base SQL :
 
 Ensuite la réponse sera reformulée par le LLM.
 
-6. **Évaluation de notre nouveau système**
+7. **Évaluation de notre nouveau système**
 
 Nous avons testé le nouveau système RAG avec les 20 mêmes questions/réponses pour pouvoir comparer les deux.
 
@@ -453,7 +487,7 @@ Lorsque nous avons la **réponse du LLM** en plus des questions/réponses, on la
 python -m scripts.evaluation.new_system.second_ragas_eveluation
 ```
 
-7. **Résultats de la seconde évaluation ragas**
+8. **Résultats de la seconde évaluation ragas**
 
 #### Moyenne global des métriques
 
@@ -468,9 +502,9 @@ python -m scripts.evaluation.new_system.second_ragas_eveluation
 On apercoit une certaine logique avec :
 - les meilleurs scores pour les questions simples.
 - une légère diminution pour les questions un peu plus compliquées.
-- Et une baisse un peu plus prononcé pour les questions bruitées par rapport au simple.
+- Et une baisse un peu plus prononcée pour les questions bruitées par rapport aux simples.
 
-On note facilement pour les perspectives que nous devons encore amélioré notre système pour sécuriser les questions bruitées.
+On note facilement pour les perspectives que nous devons encore améliorer notre système pour sécuriser les questions bruitées.
 
 # Comparaison entre les 2 systèmes avec les métriques ragas
 
@@ -478,15 +512,15 @@ Prenons la moyenne des 20 questions :
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_type_eval.png)
 
-Nous voyons clairement une amélioration significatve de notre modèle.
-- Sur faitfulness, context_recall et context_precision, les métriques se sont améliorés et prouvent :
-    - une meilleur qualité de récupération des documents
-    - les docuements récupérés sont utiles
+Nous voyons clairement une amélioration significative de notre modèle.
+- Sur faitfulness, context_recall et context_precision, les métriques se sont améliorées et prouvent :
+    - une meilleure qualité de récupération des documents
+    - les documents récupérés sont utiles
     - les affirmations des réponses sont basées sur des faits
 - Le score pour answer_relevancy a baissé par rapport à la première évaluation :
     - mais il reste bon en étant supérieur à 0.80
     - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
-    - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinent à la question.
+    - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinente à la question.
 
 # Suivre les performances
 
@@ -507,9 +541,9 @@ Pour bénéficier de Logfire, il faut avoir créer un compte :
 https://logfire.pydantic.dev
 ```
 
-Il faut également l'initier, lors de votre premier lancement sur un projet, il va vous demander de faire quelques actions, suivi les instructions.
+Il faut également l'initier, lors de votre premier lancement sur un projet, il va vous demander de faire quelques actions, suivez les instructions.
 
-Nous avons utiliser les commandes principales de Logfire pour tracker notre projet :
+Nous avons utiliseé les commandes principales de Logfire pour tracker notre projet :
 
 ```
 # Configure Logfire avec les paramètres par défaut.
@@ -538,20 +572,25 @@ logfire.instrument_system_metrics()
 with logfire.span("Router Decision"):
 ```
 
-**Utilisation de logfire span** dans le `chat.py` et le `second_evaluation_ragas.py` :
+### **Utilisation de logfire span** dans le `chat.py` et le `second_evaluation_ragas.py` :
 
-### Dans le premier afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
+#### Dans le `chat.py` afin d'avoir un suivi clair allant de la question à la réponse du chatbot :
 
 ![alt text](notebooks/screenshot/logfire_traitement_question.png)
 
-- Nous pouvons suivre en détail ce qu'il s'est passé et le pipeline passe par la validation Pydantic. 
+- Nous pouvons suivre en détail ce qu'il s'est passé et le pipeline passe par la validation Pydantic.
+- Nous avons le temps d'exécution de la requête.
+- Possibilité de savoir le nombre de tokens générés pour une question
+- On peut identifier quelle route notre "agent" a décidé de suivre
 - Il est possible de voir par exemple le détail de la réponse, quel contexte a été sélectionné :
 
 <p align="left">
   <img src="notebooks/screenshot/output_context.png" width="55%" alt="output_context">
 </p>
 
-### Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
+### Dans le `second_evaluation_ragas.py` afin d'avoir un suivi des scores des métriques ragas disponible :
+
+- Cela pourrra nous permettre de monitorer les résultats lorsque nous effecturons une nouvelle évaluation sur le nouveau prototype par exemple.
 
 - par question :
 
@@ -575,7 +614,7 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
 ![alt text](notebooks/screenshot/erreurs_dashboard.png)
 
-### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les mettre en dashboard
+### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les dans dashboard
 
 - Nombre de tokens utilisés :
 
@@ -592,6 +631,43 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 <p align="left">
   <img src="notebooks/screenshot/erreur_pydantic.png" width="155%" alt="Erreur_pydantic">
 </p>
+
+### Les apports de Logfire 
+
+L’intégration de Logfire dans ce projet a permis d’améliorer significativement la capacité de suivi, d’analyse et de compréhension du comportement du système RAG.
+
+Logfire a joué un rôle essentiel en apportant une visibilité détaillée sur les différentes étapes du pipeline, notamment la récupération des documents, la génération des réponses et les performances globales du modèle. Grâce à Logfire, il a été possible d’observer précisément le déroulement des requêtes, d’identifier les éventuels points de défaillance et de mieux comprendre les causes des mauvaises performances observées lors de la première évaluation. 
+
+L’utilisation de Logfire constitue un atout important dans une perspective d’amélioration continue. En facilitant le monitoring et le diagnostic des performances du modèle, cet outil permet d’optimiser progressivement le système RAG, d’identifier rapidement les anomalies et d’assurer une meilleure qualité des réponses générées.
+
+En conclusion, Logfire s’avère être un outil essentiel pour l’observabilité et l’évaluation du système, contribuant directement à l’amélioration de la robustesse, de la fiabilité et de la qualité globale du chatbot.
+
+# Validation des données avec Pydantic
+
+Pour garantir la robustesse du chatbot et éviter les crashs en production, ce projet intègre une **triple validation stricte** basée sur Pydantic. 
+
+La validation agit comme un bouclier à trois niveaux tout au long du cycle de vie de la donnée :
+
+### Validation en Entrée (InputData)
+Avant même de déclencher le routeur ou les bases de données, la question de l'utilisateur est contrôlée. 
+- **Objectif :** Vérifier que l'entrée n'est pas vide et respecte une taille minimale (`min_length=2`).
+- **Comportement :** Si la validation échoue, le système ne crashe pas. Il renvoie une réponse formatée polie à l'utilisateur tout en déclenchant une alerte.
+
+### Validation d'Indexation (ChunkGuard)
+Lors de la création de la base de données vectorielle (RAG), les documents découpés sont contrôlés avant leur insertion.
+- **Objectif :** S'assurer qu'aucun morceau de texte vide ou corrompu n'est indexé dans la base (`min_length=1`), et que les métadonnées obligatoires sont bien présentes. Cela garantit la qualité de l'information stockée.
+
+### Validation en Sortie (OutputData)
+Les LLMs peuvent être imprévisibles et parfois ne pas respecter le format JSON demandé. La sortie finale générée par le modèle est donc systématiquement vérifiée.
+- **Objectif :** S'assurer que la réponse contient bien toutes les clés obligatoires (`answer`, `route`, `sources`), et que la route choisie respecte un format strict (Regex : `^(SQL|VECTOR|BOTH)$`).
+
+### Observabilité et Monitoring des Erreurs
+L'ensemble du système est conçu pour être "Fail-Safe". Les erreurs Pydantic sont capturées via des blocs `try/except`. Au lieu de faire planter l'application, l'erreur est enregistrée silencieusement dans notre outil de monitoring :
+
+```
+except ValidationError as e:
+    logfire.error("Validation Pydantic Échouée", error=str(e))
+```
 
 # API & Documentation Swagger
 
@@ -649,6 +725,8 @@ Pour tester l'API et sauvegarder vos requêtes, vous pouvez utiliser Postman :
 
 ## Utilisation de Streamlit
 
+- Si vous ne voulez pas utiliser le Dockerfile :
+
 Vous avez la possibilité d'utiliser l'interface de Streamlit afin d'avoir une utilisation plus proche de ce que l'utilisateur final aura entre les mains.
 
 Depuis votre terminal (vérifiez bien d'être dans le bon projet) :
@@ -662,3 +740,4 @@ Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le c
 <p align="left">
   <img src="notebooks/screenshot/interfacechat_reponse.png" width="65%" alt="interfacechat_reponse">
 </p>
+
