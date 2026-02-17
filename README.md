@@ -12,6 +12,7 @@
 7. [Conclusion de cette première évaluation ragas](#conclusion-de-cette-première-évaluation-ragas)
 8. [Mise en place de la nouvelle structure](#mise-en-place-de-la-nouvelle-structure)
 9. [Comparaison entre les 2 systèmes avec les métriques ragas](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
+10. [Les limites de l'évaluation ragas](#les-limites-de-lévaluation-ragas)
 10. [Suivre les performances](#suivre-les-performances)
 11. [Validation des données avec Pydantic](#validation-des-données-avec-pydantic)
 12. [API & Documentation Swagger](#api--documentation-swagger)
@@ -524,7 +525,16 @@ Nous voyons clairement une amélioration significative de notre modèle.
     - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
     - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinente à la question.
 
-## Les limites de l'évaluation
+## Petit focus sur les questions couplant reddit/excel
+
+![alt text](notebooks/graph/Moyenne_metriques_ragas_both.png)
+
+- Afin d'obtenir des résultats encore plus pertinents nous pourrons aller chercher des questions encore plus difficiles.
+- Mais avec ce graphique, on note une amélioration des métriques entre la première et la deuxième méthode.
+- Le système arrive à récupérer les 2 contextes, dans la base SQL et dans la base vectorielle.
+- Nous avons encore des améliorations à faire mais les résultats sont encourageants.
+
+# Les limites de l'évaluation ragas
 
 ### Limites et biais de l'évaluation
 
@@ -767,7 +777,7 @@ Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le c
   <img src="notebooks/screenshot/interfacechat_reponse.png" width="65%" alt="interfacechat_reponse">
 </p>
 
-# Conclusions & Perspectives
+# Conclusions et Perspectives
 
 ## Conclusions
 
