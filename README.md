@@ -506,7 +506,7 @@ with logfire.span("Router Decision"):
 - Il est possible de voir par exemple le détail de la réponse, quel contexte a été sélectionné :
 
 <p align="left">
-  <img src="notebooks/screenshot/output_context.png" width="35%" alt="output_context">
+  <img src="notebooks/screenshot/output_context.png" width="55%" alt="output_context">
 </p>
 
 ### Dans le deuxième afin d'avoir un suivi des scores des métriques ragas disponible :
@@ -548,5 +548,5 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 ### Affichage si le schéma pydantic n'est pas respecté :
 
 <p align="left">
-  <img src="notebooks/screenshot/erreur_pydantic.png" width="125%" alt="Erreur_pydantic">
+  <img src="notebooks/screenshot/erreur_pydantic.png" width="155%" alt="Erreur_pydantic">
 </p>
