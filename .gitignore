@@ -14,6 +14,5 @@ __init__.py
 poetry.lock
 
 # A ignore pour le moment
-vector_db/
 .logfire
 README copy.md
