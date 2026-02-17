@@ -14,6 +14,7 @@
 9. [Comparaison entre les 2 systèmes avec les métriques ragas](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
 10. [Suivre les performances](#suivre-les-performances)
 11. [API & Documentation Swagger](#api--documentation-swagger)
+11. [Intéraction avec le chatbot](#intréraction-avec-le-chatbot)
 
 ---
 
@@ -620,7 +621,7 @@ Pour tester l'API et sauvegarder vos requêtes, vous pouvez utiliser Postman :
 4. Exemple pour le endpoint `ask`
 
 <p align="left">
-  <img src="notebooks/screenshot/postman_ask.png" width="55%" alt="postman_ask">
+  <img src="notebooks/screenshot/postman_ask.png" width="65%" alt="postman_ask">
 </p>
 
 ## Utilisation de Streamlit
@@ -636,5 +637,5 @@ streamlit run InterfaceChat.py
 Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le chatbot :
 
 <p align="left">
-  <img src="notebooks/screenshot/interfacechat_reponse.png" width="55%" alt="interfacechat_reponse">
+  <img src="notebooks/screenshot/interfacechat_reponse.png" width="65%" alt="interfacechat_reponse">
 </p>
