@@ -532,8 +532,8 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
 - Comparaison du temps par question sur la dernière question posée vs la moyenne du temps par question :
 
-<p align="center">
-  <img src="notebooks/screenshot/temps_dashboard.png" width="85%" alt="Dashboard des temps de réponse">
+<p align="left">
+  <img src="notebooks/screenshot/temps_dashboard.png" width="35%" alt="Dashboard des temps de réponse">
 </p>
 
 #### Affichage si le schéma pydantic n'est pas respecté :
