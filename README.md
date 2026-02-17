@@ -4,6 +4,31 @@ Ce projet implémente un assistant virtuel basé sur un modèle Llama, utilisant
 L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à des améliorations afin d'obtenir des meilleurs résultats.
 Les améliorations seront visibles avec une comparaison des métriques ragas sur le prototype vs la nouvelle structure du projet.
 
+## Sommaire
+
+- [Résultats de l'évaluation ragas](#résultats-de-lévaluation-sur-lensemble-des-questions)
+- [Résultats par type de question](#résultats-de-lévaluation-par-type-de-question)
+- [Conclusion de la première évaluation ragas](#conclusion-de-cette-première-évaluation-ragas)
+
+- [Mise en place de la nouvelle structure](#mise-en-place-de-la-nouvelle-structure)
+  - [Technologies utilisées](#1-technologies-utilisées)
+  - [Définition du nouvel objectif](#2-définition-de-notre-nouveau-objectif)
+  - [Nouvelle organisation du projet](#3-nouvelle-organisation-du-projet)
+  - [Mise en place de la base de données](#4-mise-en-place-de-la-base-de-données)
+  - [Mise en place du routeur](#5-mise-en-place-dun-routeur-pour-sélectionner-les-bonnes-données)
+  - [Évaluation du nouveau système](#6-évaluation-de-notre-nouveau-système)
+  - [Résultats de la seconde évaluation](#7-résultats-de-la-seconde-évaluation-ragas)
+
+- [Comparaison entre les deux systèmes](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
+
+- [Suivi des performances](#suivre-les-performances)
+  - [Mise en place dans le système RAG](#mise-en-place-dans-notre-système-rag)
+  - [Visualisation avec Logfire](#visualation-avec-des-dashboard)
+
+- [API & Documentation Swagger](#api--documentation-swagger)
+  - [Endpoints](#api--documentation-swagger)
+  - [Documentation Swagger](#documentation-swagger)
+
 ## Fonctionnalités
 
 - 🗄️ **Création des vecteurs** avec HuggingFaceEmbeddings.
@@ -549,4 +574,22 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 
 <p align="left">
   <img src="notebooks/screenshot/erreur_pydantic.png" width="155%" alt="Erreur_pydantic">
+</p>
+
+# API & Documentation Swagger
+
+Swagger est un outil qui permet de documenter, décrire et tester une API REST de manière claire et interactive.
+Plus précisément, la documentation Swagger est une description structurée d’une API qui montre tous les endpoints disponibles, leurs paramètres, les requêtes possibles et les réponses retournées.
+
+Dans notre API qui repose sur `FastAPI` nous avons 4 endpoints :
+
+- `@app.get("/health")` : va permettre de s'assurer que l'API est opérationnel
+- `@app.post("/ask")` : va permettre d'intéragir avec le chatbot
+- `@app.post("/rebuild_index")` : va permettre la construction ou re-construction de la base vectorielle
+- `@app.post('/rebuild_SQL_Base')` : va permettre la construction ou re-construction de la base de données
+
+#### Documentation Swagger :
+
+<p align="left">
+  <img src="notebooks/screenshot/doc_swagger.png" width="55%" alt="doc_swagger">
 </p>
