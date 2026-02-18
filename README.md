@@ -16,7 +16,7 @@
 10. [Suivre les performances](#suivre-les-performances)
 11. [Validation des données avec Pydantic](#validation-des-données-avec-pydantic)
 12. [API & Documentation Swagger](#api--documentation-swagger)
-13. [Intéraction avec le chatbot](#intéraction-avec-le-chatbot)
+13. [Interaction avec le chatbot](#intéraction-avec-le-chatbot)
 14. [Conclusions et Perspectives](#conclusions-et-perspectives)
 
 ---
@@ -30,7 +30,7 @@ Les améliorations seront visibles avec une comparaison des métriques ragas sur
 
 - 🗄️ **Création des vecteurs** avec HuggingFaceEmbeddings.
 - 🗄️ **Recherche sémantique** avec FAISS pour trouver les documents pertinents (PDF à disposition).
-- 🗄️ **Recherche dans une base relationnelle** avec une base de données PostreSQL pour effectuer une recherche des éléments chiffrés.
+- 🗄️ **Recherche dans une base relationnelle** avec une base de données PostgreSQL pour effectuer une recherche des éléments chiffrés.
 - 🔍 **Choix du système** pour sélectionner le bon type de donnée à prendre.
 - 🤖 **Génération de réponses** avec un modèle Llama (llama-3.3-70b-versatile) via Groq.
 - ⚙️ **Paramètres personnalisables** (modèle, nombre de documents, score minimum, etc).
@@ -39,7 +39,7 @@ Les améliorations seront visibles avec une comparaison des métriques ragas sur
 
 - Python 3.9+ 
 - Clé API Groq (avoir un compte et se diriger vers : https://console.groq.com/keys)
-- Avoir une solution de stockage en local (PostreSQL utilisé ici)
+- Avoir une solution de stockage en local (PostgreSQL utilisé ici)
 
 ## Installation
 
@@ -64,7 +64,7 @@ code .
     4.	Recherchez “Python: Select Interpreter”.
     5.	Sélectionnez l’environnement créé par Poetry ou celui dans lequel tu as installé le projet.
 
-5. **Configurer la clé API**
+5. **Configurez la clé API**
 
 Créez un fichier `.env` à la racine du projet avec le contenu suivant :
 
@@ -78,7 +78,7 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 ```
 .
 ├── data/                                      # Dossier contenant nos fichiers csv d'évaluation
-│   └── processed/                             # Création de nouveaux fichiers csv 
+│   └── processed/                             # Création des nouveaux fichiers csv 
 │       ├──concat_eval_ragas.csv               # Tableau récapitulatif avec les deux évaluations Ragas
 │       ├──first_ragas_results.csv             # Résultats de la première évaluation ragas
 │       ├──first_eval_results.csv              # Génération des questions/réponses de la première évaluation
@@ -118,12 +118,13 @@ DATABASE_URL="postgresql://**user**:**mdp**e@localhost:5432/**nom_bdd**"
 │   ├──build_index.py                          # Script de création de la base vectorielle
 │   ├──chat.py                                 # Script de génération de la réponse du chatbot
 │   ├──generation_db.py                        # Script de génération de la base de données
+│   ├──init_postgres.sh                        # Script bash pour le lancement des commandes de la création de la BDD sur PostgreSQL
 ├── tests/                                     # Dossier avec l'enregistrement de notre base vectorielle
 │   ├──valisation_pydantic.py                  # Tests d'entrées/sorties et des chunk avec Pydantic
 ├── vector_db/                                 # Dossier avec l'enregistrement de notre base vectorielle
 │   ├──faiss_index.pkl                         # Les documents découpés en format pkl
 │   ├──faiss_index.faiss                       # la base d'index FAISS
-├── .env                                       # Enregistrement des informations qui ne doivent pas être publiées
+├── .env                                       # Enregistrement des informations qui ne doivent pas être publiées (uniquement en local)
 ├── .gitignore                                 # Permet de ne pas afficher les éléments sélectionnés sur GitHub
 ├── app.py                                     # Orchestre la vectorisation et la sauvegarde
 ├── InterfaceChat.py                           # Script pour le lancement de l'API et de l'interface avec Streamlit
@@ -141,7 +142,7 @@ Placez vos documents dans le dossier `data/raw`.
 Deux formats sont suportés pour le projet, il est possible de placer des documents en PDF ainsi que des fichiers excel.
 - Les documents en PDF seront transformés et enregistrés dans une base vectorielle.
 - Les fichiers excel seront nettoyés et ajoutés dans une base de données relationnelle (PostreSQL utilisé ici).
-- Pour maintenir une cohérence et une fiabilité dans nos données, les fichiers excel doivent respecter un certain format (vous pouvez par exemple celui utilisé  dans data/raw).
+- Pour maintenir une cohérence et une fiabilité dans nos données, les fichiers excel doivent respecter un certain format (vous pouvez par exemple utiliser celui dans data/raw).
 
 ### 2. Génération des documents et de la base de données
 #### Pour la création des vecteurs des documents en PDF
@@ -166,14 +167,12 @@ L'enregistrement des datas dans la base données se fait dans une base PostreSQL
 1. Connexion à une base PostreSQL
 Choix de la BDD PostreSQL pour sa simplicité avec l'ORM SQLAlchemy.
 Création d'une BDD en local :
-- Ouvrez votre terminal puis lancez les commandes une à une :
+- Ouvrez votre terminal puis lancez la commande :
+
+```bash
+./scripts/init_postgres.sh
 ```
-psql
-CREATE DATABASE sportsee_nba_stats;
-CREATE USER sportsee_user WITH PASSWORD '***';
-GRANT ALL PRIVILEGES ON DATABASE sportsee_nba_stats TO sportsee_user;
-ALTER DATABASE sportsee_nba_stats OWNER TO sportsee_user;
-```
+
 - Accès à la BDD
 ```
 psql -U sportsee_user -d sportsee_nba_stats
@@ -188,7 +187,7 @@ Depuis la documentation Swagger vous pouvez générer la base de données via le
 
 ### 3. Pour lancer le projet, vous avez plusieurs options :
 
-- La méthode privilégiée pour exécuter l'interface est **Docker**, garantissant un environnement isolé et stable.
+- Lancement de l'interface Streamlit : première méthode avec **Docker**, garantissant un environnement isolé et stable.
 1. Prérequis
 - Docker installé sur votre machine.
 - Une clé API Groq active.
@@ -206,13 +205,24 @@ docker run -d \
   --env-file .env \
   sportsee-streamlit
 ```
-- On peut également générer le projet via la documentation swagger de FastAPI : 
+- Lancement de l'interface Streamlit : deuxième méthode depuis votre terminal (assurez-vous d'être dans votre projet) :
 
-Une fois votre fichier app lancé, vous pouvez rejoindre la documentation intéractive et tester les endpoints :
+```
+streamlit run InterfaceChat.py
+```
 
+- Interaction avec le chatbot depuis votre en API en local avec **FastAPI** :
+
+1. Lancer l'app.py
+```
+poetry run python app.py
+```
+2. Puis ouvrez un navigateur et se rendre sur la documentation swagger de notre API
 ```
 http://localhost:7860/docs
 ```
+
+Une fois votre API lancée, vous pouvez rejoindre la documentation intéractive et tester les différents endpoints.
 
 # Rapport technique - du prototype au système actuel
 ## Reprise d'un prototype existant
@@ -222,7 +232,7 @@ Pour mener à bien cette mission, nous avons eu à disposition un prototype du c
 ### Audit du prototype
 1. **Organisation du projet**
 
-La structure de l'ancien fichier était la suivante :
+La structure de l'ancien projet était la suivante :
 ```
 ├── inputs/                   # Dossier contenant les données à utiliser
 │   ├──Reddit 1.pdf           # Capture d'écran de Reddit
@@ -261,12 +271,12 @@ streamlit run MistralChat.py
 
 4. **Analyse des performances du système**
 
-L'entreprise nous a signalé que les réponses n'étaient pas suffisantes pour eux. Elle a confié que les résultats sur les archives textuelles étaient encourageantes mais ils deviennent moins bons en interrogeant avec des questions plus précises sur les statistiques par exemple.
+L'entreprise nous a signalé que les réponses n'étaient pas suffisantes pour eux. Elle a confié que les résultats sur les archives textuelles étaient encourageantes mais ils deviennent moins bons en interrogeant le chatbot avec des questions plus précises sur les statistiques par exemple.
 Afin de s'en rendre compte nous allons évaluer le système avec les métriques Ragas pour se faire notre propre avis.
 
 - **Génération des questions/réponses**
 
-L'objectif est d'évaluer le modèle avec ragas, pour cela il faut avoir un jeu de questions/réponses pour obtenir les métriques. 
+L'objectif est d'évaluer le modèle avec Ragas, pour cela il faut avoir un jeu de questions/réponses pour obtenir les métriques. 
 Création du fichier **generation_answers.py** dans un nouveau dossier scripts/evaluation (vous le trouverez dans le dossier prototype)
 
 On y retouve 20 questions et 20 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
@@ -281,10 +291,10 @@ On y retouve 20 questions et 20 réponses (humaines) portant sur le fichier exce
 **À la suite de ces questions, nous appelons notre système pour obtenir les réponses du chatbot.**
 
 Dans le fichier csv généré (dans le dossier resultat_evaluation.csv) nous retrouvons en plus des questions/réponses (humaines + chatbot) :
-- la liste des contextes utilisés par le chatbot pour fournir une réponse (obligatoire pour ragas)
+- la liste des contextes utilisés par le chatbot pour fournir une réponse (obligatoire pour Ragas)
 - le numéro des documents sélectionnés
 
-**Lancement de l'évaluation ragas**
+**Lancement de l'évaluation Ragas**
 
 Nous chargeons les métriques que nous voulons utiliser pour évaluer le modèle (dans le fichier : first_ragas_evaluation.py) :
 - **faithfulness** Génération: fidèle au contexte ?
@@ -332,7 +342,7 @@ Regardons les résultats par type de question :
 
 On voit avec ce graphique que les scores globaux sont tirés vers le haut par les questions simples :
 - Sur des questions factuelles, en posant des questions simples, courtes et précises, le système s'en sort légèrement mieux qu'au global mais les scores restent très bas (hors answer relevancy). On devrait avoir des résultats bien supérieurs sur ce type de question.
-- Sur les questions compliquées et bruitées, c'est à dire des questions un peu plus longues et des questions volontairements moins explicites, les scores se dégradent. On y voit nettement plus d'hallucinations et les réponses ne s'appuyent pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
+- Sur les questions compliquées et bruitées, c'est à dire des questions un peu plus longues et des questions volontairement moins explicites, les scores se dégradent. On y voit nettement plus d'hallucinations et les réponses ne s'appuient pas sur le contexte mais de plus en plus sur des recherches internet via le LLM.
 
 - **Conclusion de cette première évaluation ragas**
 
@@ -366,12 +376,12 @@ Nous avons le choix de changer de modèle LLM & d'embeddings pour plusieurs rais
 - Mistral small pour le LLM
 - Mistral embed pour la création des vecteurs 
 
-Lors de la mise en place de la nouvelle structure nous avons vite atteint la limite des tokens autorisés dans un plan gratuit. On a alors profité de cette limitation pour changer d'envrionnement et de choisir de passer Groq pour le choix du LLM et passer sur HuggingFaceEmbeddings pour la création des vecteurs.
+Lors de la mise en place de la nouvelle structure nous avons vite atteint la limite des tokens autorisés dans un plan gratuit. On a alors profité de cette limitation pour changer d'envrionnement et de choisir de passer à la solution Groq pour le choix du LLM et passer sur HuggingFaceEmbeddings pour la création des vecteurs.
 
 - Groq est une plateforme qui fournit une infrastructure ultra-rapide pour exécuter des modèles d’intelligence artificielle (LLM). Elle propose une API compatible permettant d’utiliser différents modèles de langage via une seule interface.
 Groq utilise un matériel spécialisé appelé LPU (Language Processing Unit), conçu pour accélérer l’inférence des modèles IA, ce qui permet d’obtenir des réponses très rapides.
 
-On a essayé plusieurs modèles (visible dan sun dashboard dans l'interface de Logfire) avant de choisir celui qui nous convenait le mieux : `llama-3.3-70b-versatile`
+On a essayé plusieurs modèles (visible dans un dashboard dans l'interface de Logfire) avant de choisir celui qui nous convenait le mieux : `llama-3.3-70b-versatile`
 
 - HuggingFaceEmbeddings est un composant qui permet de convertir du texte en vecteurs numériques (embeddings) en utilisant des modèles disponibles sur la plateforme Hugging Face. Choix du `sentence-transformers/all-MiniLM-L6-v2`.
 
@@ -386,12 +396,12 @@ Désormais nous avons une organisation plus fluide, nous avons mis en place par 
     - build_index qui va construire ou reconstruire la base vectorielle
     - chat qui permet de générer la réponse du chatbot
     - generation_db qui va permettre de créer ou mettre à jour la base de données SQL
-- Mise en place d'un fichier app pour la mise en place de notre API Rest qui est en plus de l'interface Streamlit.
+- Mise en place d'un fichier app pour la mise en place de notre API Rest qui est en + de l'interface Streamlit.
 - Mise en place d'un Dockerfile pour la génération de l'interface Streamlit.
 
 5. **Mise en place de la base de données**
 
-Nous avons détaillé l'installation de la base de données un peu plus haut. Nous avons fait le choix d'utiliser une base en local pour le moment avec PostreSQL.
+Nous avons détaillé l'installation de la base de données un peu plus haut. Nous avons fait le choix d'utiliser une base en local pour le moment avec PostgreSQL.
 
 Après avoir initialisée et générée la base de données comme indiqué en introduction, nous avons une BDD sur laquelle s'appuyer.
 
@@ -496,7 +506,7 @@ python -m scripts.evaluation.new_system.second_ragas_eveluation
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_seconde_eval.png)
 
-- Sur l'ensemble des 4 métriques, nous avons des résultats solides qui démontrent des réponses cohérentes et documentés sur les 20 questions que nous avons posé.
+- Sur l'ensemble des 4 métriques, nous avons des résultats solides qui démontrent des réponses cohérentes et documentées sur les 20 questions que nous avons posé.
 
 #### Moyenne par type de question
 
@@ -507,7 +517,7 @@ On apercoit une certaine logique avec :
 - une légère diminution pour les questions un peu plus compliquées.
 - Et une baisse un peu plus prononcée pour les questions bruitées par rapport aux simples.
 
-On note facilement pour les perspectives que nous devons encore améliorer notre système pour sécuriser les questions bruitées.
+On note pour un futur proche que nous devons encore améliorer notre système pour sécuriser les questions bruitées.
 
 # Comparaison entre les 2 systèmes avec les métriques ragas
 
@@ -525,7 +535,7 @@ Nous voyons clairement une amélioration significative de notre modèle.
     - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
     - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinente à la question.
 
-## Petit focus sur les questions couplant reddit/excel
+## Petit focus sur les questions qui regroupent une récupération dans les fichiers pdf et dans le fichier excel
 
 ![alt text](notebooks/graph/Moyenne_metriques_ragas_both.png)
 
@@ -579,7 +589,7 @@ https://logfire.pydantic.dev
 
 Il faut également l'initier, lors de votre premier lancement sur un projet, il va vous demander de faire quelques actions, suivez les instructions.
 
-Nous avons utiliseé les commandes principales de Logfire pour tracker notre projet :
+Nous avons utilisé les commandes principales de Logfire pour tracker notre projet :
 
 ```
 # Configure Logfire avec les paramètres par défaut.
@@ -638,17 +648,13 @@ with logfire.span("Router Decision"):
   <img src="notebooks/screenshot/logfire_ragas_total.png" width="35%" alt="Image_métriques_ragas">
 </p>
 
-### Visualation avec des dashboard
+### Visualation avec des dashboards
 
-Logfire nous permet de suivre plusieurs élements de notre projet comme :
+Logfire nous permet de suivre plusieurs éléments de notre projet comme :
 
 - process count & system CPU
 
 ![alt text](notebooks/screenshot/systeme_dashboard.png)
-
-- Les erreurs rencontrées
-
-![alt text](notebooks/screenshot/erreurs_dashboard.png)
 
 ### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les dans dashboard
 
@@ -661,6 +667,11 @@ Logfire nous permet de suivre plusieurs élements de notre projet comme :
 <p align="left">
   <img src="notebooks/screenshot/temps_dashboard.png" width="35%" alt="Dashboard des temps de réponse">
 </p>
+
+- Les erreurs rencontrées
+
+![alt text](notebooks/screenshot/erreurs_dashboard.png)
+
 
 ### Affichage si le schéma pydantic n'est pas respecté :
 
@@ -723,9 +734,9 @@ Dans notre API qui repose sur `FastAPI` nous avons 4 endpoints :
   <img src="notebooks/screenshot/doc_swagger.png" width="55%" alt="doc_swagger">
 </p>
 
-# Intéraction avec le chatbot
+# Interaction avec le chatbot
 
-Plusieurs options s'offrent à vous pour intéragir avec le chatbot :
+Plusieurs options s'offrent à vous pour interagir avec le chatbot :
 
 ## Utilisation de Postman
 
@@ -795,12 +806,12 @@ Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le c
   - capacité de pouvoir stocker nos métriques d'évaluations
   - voir le contexte utilisé par le chatbot
 
-- Nous avons plusieurs méthodes pour intéragir avec le chatbot de SportSee 
+- Nous avons plusieurs méthodes pour interagir avec le chatbot de SportSee 
 
 ## Perpsectives
 
 - Ajouter des questions encore plus compliquées et bruitées pour voir comment il réagit et stocker les résultats sous Logfire
 - Obtenir plus de données, par exemple avoir un détail des résultats des matchs
-- Ajouter des fichiers PDF, textes afin de proposer des questions plus précises
-- La gestion actuelle des PDF n'est pas optimale, les fichiers ne sont pas nettoyés et pré-traités
+- Ajouter des fichiers PDF, textes, afin de proposer des questions plus précises
+- La gestion actuelle des PDF n'est pas optimale, les fichiers ne sont pas nettoyés; ni pré-traités
   - Cela pourrait permettre une meilleure récupération des informations de Reddit.
