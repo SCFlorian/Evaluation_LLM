@@ -18,6 +18,7 @@
 13. [API & Documentation Swagger](#api--documentation-swagger)
 14. [Interaction avec le chatbot](#interaction-avec-le-chatbot)
 15. [Conclusions et Perspectives](#conclusions-et-perspectives)
+16. [Annexe](#annexe)
 
 ---
 
