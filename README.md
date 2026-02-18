@@ -815,3 +815,10 @@ Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le c
 - Ajouter des fichiers PDF, textes, afin de proposer des questions plus précises
 - La gestion actuelle des PDF n'est pas optimale, les fichiers ne sont pas nettoyés ni prétraités
   - Cela pourrait permettre une meilleure récupération des informations de Reddit
+
+# Annexe
+
+**Schéma simple d'un système RAG**
+
+![alt text](notebooks/screenshot/Annexe_systeme_rag.png)
+
