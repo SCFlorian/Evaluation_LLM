@@ -816,9 +816,10 @@ Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le c
 - La gestion actuelle des PDF n'est pas optimale, les fichiers ne sont pas nettoyés ni prétraités
   - Cela pourrait permettre une meilleure récupération des informations de Reddit
 
-# Annexe
+# Annexe pour la présentation
 
-**Schéma simple d'un système RAG**
+**Schéma simple du système RAG du prototype (sans routeur et sans PostreSQL)**
 
 ![alt text](notebooks/screenshot/Annexe_systeme_rag.png)
 
+**La présentation du nouveau sytème RAG se fera via Logfire pour une meilleure visibilité**
