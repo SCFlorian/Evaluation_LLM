@@ -2,7 +2,7 @@
 name = "evaluation-performances-llm"
 version = "0.1.0"
 description = "Projet RAG Hybride NBA"
-authors = ["Florian <florian@example.com>"]
+authors = ["Florian <schorer.florian@me.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.13,<3.15"

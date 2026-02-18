@@ -13,17 +13,17 @@
 8. [Mise en place de la nouvelle structure](#mise-en-place-de-la-nouvelle-structure)
 9. [Comparaison entre les 2 systèmes avec les métriques ragas](#comparaison-entre-les-2-systèmes-avec-les-métriques-ragas)
 10. [Les limites de l'évaluation ragas](#les-limites-de-lévaluation-ragas)
-10. [Suivre les performances](#suivre-les-performances)
-11. [Validation des données avec Pydantic](#validation-des-données-avec-pydantic)
-12. [API & Documentation Swagger](#api--documentation-swagger)
-13. [Interaction avec le chatbot](#intéraction-avec-le-chatbot)
-14. [Conclusions et Perspectives](#conclusions-et-perspectives)
+11. [Suivre les performances](#suivre-les-performances)
+12. [Validation des données avec Pydantic](#validation-des-données-avec-pydantic)
+13. [API & Documentation Swagger](#api--documentation-swagger)
+14. [Interaction avec le chatbot](#interaction-avec-le-chatbot)
+15. [Conclusions et Perspectives](#conclusions-et-perspectives)
 
 ---
 
 Ce projet implémente un assistant virtuel basé sur un modèle Llama, utilisant la technique de Retrieval-Augmented Generation (RAG) pour fournir des réponses précises et contextuelles à partir d'une base de connaissances personnalisée.
-L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à des améliorations afin d'obtenir des meilleurs résultats.
-Les améliorations seront visibles avec une comparaison des métriques ragas sur le prototype vs la nouvelle structure du projet.
+L'objectif est de reprendre un prototype réalisé qui était fonctionnel et de procéder à des améliorations afin d'obtenir de meilleurs résultats.
+Les améliorations seront visibles avec une comparaison des métriques Ragas sur le prototype vs la nouvelle structure du projet.
 
 
 ## Fonctionnalités
@@ -139,9 +139,9 @@ Nous avons effectué beaucoup de changements entre le prototype et la nouvelle v
 ### 1. Ajouter des documents
 
 Placez vos documents dans le dossier `data/raw`.
-Deux formats sont suportés pour le projet, il est possible de placer des documents en PDF ainsi que des fichiers excel.
+Deux formats sont supportés pour le projet, il est possible de placer des documents en PDF ainsi que des fichiers excel.
 - Les documents en PDF seront transformés et enregistrés dans une base vectorielle.
-- Les fichiers excel seront nettoyés et ajoutés dans une base de données relationnelle (PostreSQL utilisé ici).
+- Les fichiers excel seront nettoyés et ajoutés dans une base de données relationnelle (PostgreSQL utilisé ici).
 - Pour maintenir une cohérence et une fiabilité dans nos données, les fichiers excel doivent respecter un certain format (vous pouvez par exemple utiliser celui dans data/raw).
 
 ### 2. Génération des documents et de la base de données
@@ -163,7 +163,7 @@ Ici vous pouvez générer la base d'index via le bouton `rebuild_index`.
 Cela va permettre également la génération des vecteurs dans le dossier `vector_db/`
 
 #### Pour la création de la base de données
-L'enregistrement des datas dans la base données se fait dans une base PostreSQL en local.
+L'enregistrement des datas dans la base données se fait dans une base PostgreSQL en local.
 1. Connexion à une base PostreSQL
 Choix de la BDD PostreSQL pour sa simplicité avec l'ORM SQLAlchemy.
 Création d'une BDD en local :
@@ -266,7 +266,7 @@ La structure de l'ancien projet était la suivante :
 ```
 streamlit run MistralChat.py
 ```
-- L'application fonctionne, on peut intéragir avec le chatbot et il propose des réponses argumentées.
+- L'application fonctionne, on peut interagir avec le chatbot et il propose des réponses argumentées.
 - À ce stade il est difficile d'évaluer la cohérence et la pertinence des réponses apportées par le chatbot.
 
 4. **Analyse des performances du système**
@@ -279,7 +279,7 @@ Afin de s'en rendre compte nous allons évaluer le système avec les métriques 
 L'objectif est d'évaluer le modèle avec Ragas, pour cela il faut avoir un jeu de questions/réponses pour obtenir les métriques. 
 Création du fichier **generation_answers.py** dans un nouveau dossier scripts/evaluation (vous le trouverez dans le dossier prototype)
 
-On y retouve 20 questions et 20 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
+On y retrouve 20 questions et 20 réponses (humaines) portant sur le fichier excel avec plusieurs degrés de complexité :
 - **Questions faciles (valeurs directes)**
 - **Questions compliquées (comparaisons)**
 - **Questions plus difficiles (questions bruitées)**
@@ -320,14 +320,14 @@ Sur ce graphique nous avons déjà de la matière pour une interprétation :
 
 - On voit un score de "answer relevancy", pertinence de la réponse, élevé en moyenne avec 0.92. Pour rappel lors du calcul de cette métrique, le LLM va générer des questions implicites à partir de la réponse, il va comparer les questions avec la question originale et le score est basé sur la similarité sémantique.
     - Cela signifie que les réponses sont bien alignées sémantiquement avec la question. Par contre une réponse peut être pertinente mais fausse.
-- Le score de "faitfulness", la fidelité de la réponse, est très bas avec 0.17 en moyenne sur les 20 questions. Cette métrique permet de découper la réponse générée en affirmation factuelle. Pour chaque affirmation, il y a une vérification qu'elles soient bien supportées par au moins un contexte. 
+- Le score de "faithfulness", la fidelité de la réponse, est très bas avec 0.17 en moyenne sur les 20 questions. Cette métrique permet de découper la réponse générée en affirmation factuelle. Pour chaque affirmation, il y a une vérification qu'elles soient bien supportées par au moins un contexte. 
     - Le score atteste que les affirmations de la réponse ne sont pas beaucoup appuyées sur le contexte généré. Cela peut indiquer des hallucinations importantes.
 - Le score de "context_precision", les documents récupérés sont-ils utiles, est aussi bas avec 0.20 en moyenne. Pour chaque contexte,le LLM juge “Ce contexte est-il nécessaire pour répondre à la question ?”.
     - Un score de 0.20 signifie beaucoup de documents récupérés et peu pertinents. Le système de retrieval ramène beaucoup de bruit.
 - Le score de "context_recall", avons-nous récupéré toutes les infos nécessaires, est bas avec 0.33 en moyenne. Ici le LLM va identifier les informations clés requises pour répondre à la question. Ensuite il va vérifier si elles apparaissent dans le context.
     - 0.33 signifie qu'on ne récupère pas les bons documents ou on ne récupère qu’une petite partie des informations nécessaires.
 
-En conlusion de la moyenne globale :
+En conclusion de la moyenne globale :
 
 - la relevancy élevée montre que le LLM comprend bien la question.
 - la faithfulness très basse, il invente ou extrapole.
@@ -350,7 +350,7 @@ En regardant uniquement les réponses de l'interface du chatbot, il arrive à r�
 Les scores démontrent un manque d'efficacité à récupérer les documents utiles pour apporter une réponse cohérente et factuelle et va s'appuyer sur une recherche internet que par notre système RAG.
 
 Nous avons alors regardé comment les documents sont générés et nous avons identifié ce qui pourrait être le problème. 
-**Actuellement le modèle prend en compte le fichier excel comme un fichier texte.** En l'état, le modèle prend en compte les données en texte et va les découper, il va alors se "perdre" lors du retrieval et ne va pas être capable de porposer des calculs si par exemple on lui demande de calculer le nombre de points d'une équipe en particulier.
+**Actuellement le modèle prend en compte le fichier excel comme un fichier texte.** En l'état, le modèle prend en compte les données en texte et va les découper, il va alors se "perdre" lors du retrieval et ne va pas être capable de proposer des calculs si par exemple on lui demande de calculer le nombre de points d'une équipe en particulier.
 
 ## Mise en place de la nouvelle structure
 
@@ -362,7 +362,7 @@ L'idée n'a pas été de repartir totalement d'une page blanche. Il y a désorma
 - Interface : Streamlit
 - LLM : utilisation de Groq et choix du modèle llama-3.3-70b-versatile
     - Groq va nous permettre de pouvoir utiliser d'autres modèles si besoin et surtout permettre une meilleure visibilité sur les coûts générés
-- Embeddings : utilisation de HuggingFaceEmbeddings pour la création des vecteurs et choix de l'index FLatL2 de FAISS pour la base vectorielle
+- Embeddings : utilisation de HuggingFaceEmbeddings pour la création des vecteurs et choix de l'index FlatL2 de FAISS pour la base vectorielle
 - Orchestration : Langchain
 - Gestion des dépendances : environnement poetry
 
@@ -376,7 +376,7 @@ Nous avons le choix de changer de modèle LLM & d'embeddings pour plusieurs rais
 - Mistral small pour le LLM
 - Mistral embed pour la création des vecteurs 
 
-Lors de la mise en place de la nouvelle structure nous avons vite atteint la limite des tokens autorisés dans un plan gratuit. On a alors profité de cette limitation pour changer d'envrionnement et de choisir de passer à la solution Groq pour le choix du LLM et passer sur HuggingFaceEmbeddings pour la création des vecteurs.
+Lors de la mise en place de la nouvelle structure nous avons vite atteint la limite des tokens autorisés dans un plan gratuit. On a alors profité de cette limitation pour changer d'environnement et de choisir de passer à la solution Groq pour le choix du LLM et passer sur HuggingFaceEmbeddings pour la création des vecteurs.
 
 - Groq est une plateforme qui fournit une infrastructure ultra-rapide pour exécuter des modèles d’intelligence artificielle (LLM). Elle propose une API compatible permettant d’utiliser différents modèles de langage via une seule interface.
 Groq utilise un matériel spécialisé appelé LPU (Language Processing Unit), conçu pour accélérer l’inférence des modèles IA, ce qui permet d’obtenir des réponses très rapides.
@@ -425,7 +425,7 @@ Maintenant nous avons 2 sources de données, une provenant d'une base vectoriell
 
 L'approche n'est plus la même que dans le prototype, il faut mettre en place un **agent** qui va prendre la décision si la question répond à un besoin pour une requête SQL, une récupération dans les vecteurs ou dans les 2 bases.
 
-C'est le script `routeur` qui va prendre cette décision via un prompt strcturé dans une chaîne LCEL.
+C'est le script `routeur` qui va prendre cette décision via un prompt structuré dans une chaîne LCEL.
 LCEL signifie LangChain Expression Language. C’est un langage utilisé dans la bibliothèque LangChain pour créer et connecter des composants d’intelligence artificielle (LLM) de manière simple et lisible.
 
 Voici le prompt utilisé pour la génération du choix :
@@ -532,7 +532,7 @@ Nous voyons clairement une amélioration significative de notre modèle.
     - les affirmations des réponses sont basées sur des faits
 - Le score pour answer_relevancy a baissé par rapport à la première évaluation :
     - mais il reste bon en étant supérieur à 0.80
-    - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquements proches.
+    - le score de la première évaluation peut être dû au fait que le système était moins bien cadré, il allait chercher des informations sur internet, les réponses sont fausses mais sémantiquement proches.
     - dans la deuxième évaluation le score a baissé mais la réponse se base uniquement sur les documents récupérés et répond de manière plus pertinente à la question.
 
 ## Petit focus sur les questions qui regroupent une récupération dans les fichiers pdf et dans le fichier excel
@@ -648,7 +648,7 @@ with logfire.span("Router Decision"):
   <img src="notebooks/screenshot/logfire_ragas_total.png" width="35%" alt="Image_métriques_ragas">
 </p>
 
-### Visualation avec des dashboards
+### Visualisation avec des dashboards
 
 Logfire nous permet de suivre plusieurs éléments de notre projet comme :
 
@@ -656,7 +656,7 @@ Logfire nous permet de suivre plusieurs éléments de notre projet comme :
 
 ![alt text](notebooks/screenshot/systeme_dashboard.png)
 
-### Possibilité de créer ses propres dashboard en créant des reqêutes SQL dans "explore" puis les dans dashboard
+### Possibilité de créer ses propres dashboard en créant des requêtes SQL dans "explore" puis les dans dashboard
 
 - Nombre de tokens utilisés :
 
@@ -723,8 +723,8 @@ Plus précisément, la documentation Swagger est une description structurée d�
 
 Dans notre API qui repose sur `FastAPI` nous avons 4 endpoints :
 
-- `@app.get("/health")` : va permettre de s'assurer que l'API est opérationnel
-- `@app.post("/ask")` : va permettre d'intéragir avec le chatbot
+- `@app.get("/health")` : va permettre de s'assurer que l'API est opérationnelle
+- `@app.post("/ask")` : va permettre d'interagir avec le chatbot
 - `@app.post("/rebuild_index")` : va permettre la construction ou re-construction de la base vectorielle
 - `@app.post('/rebuild_SQL_Base')` : va permettre la construction ou re-construction de la base de données
 
@@ -813,5 +813,5 @@ Votre navigateur va s'ouvrir et vous aurez la possibilité d'échanger avec le c
 - Ajouter des questions encore plus compliquées et bruitées pour voir comment il réagit et stocker les résultats sous Logfire
 - Obtenir plus de données, par exemple avoir un détail des résultats des matchs
 - Ajouter des fichiers PDF, textes, afin de proposer des questions plus précises
-- La gestion actuelle des PDF n'est pas optimale, les fichiers ne sont pas nettoyés; ni pré-traités
-  - Cela pourrait permettre une meilleure récupération des informations de Reddit.
+- La gestion actuelle des PDF n'est pas optimale, les fichiers ne sont pas nettoyés ni prétraités
+  - Cela pourrait permettre une meilleure récupération des informations de Reddit
